@@ -1,0 +1,26 @@
+{
+    "name": "istvanmolitor/stock",
+    "description": "Stock",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Molitor István",
+            "email": "istvanmolitor@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "Molitor\\Stock\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Molitor\\Stock\\Providers\\StockServiceProvider"
+            ]
+        }
+    }
+}

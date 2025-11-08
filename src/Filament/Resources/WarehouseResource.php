@@ -1,0 +1,85 @@
+<?php
+
+namespace Molitor\Stock\Filament\Resources;
+
+use Filament\Actions\Action;
+use Filament\Resources\Resource;
+use Filament\Forms;
+use Filament\Tables;
+use Filament\Tables\Table;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Schemas\Schema;
+use Illuminate\Support\Facades\Gate;
+use Molitor\Stock\Filament\Resources\WarehouseResource\Pages;
+use Molitor\Stock\Models\Warehouse;
+
+class WarehouseResource extends Resource
+{
+    protected static ?string $model = Warehouse::class;
+
+    protected static \BackedEnum|null|string $navigationIcon = 'heroicon-o-building-storefront';
+
+    public static function getNavigationGroup(): string
+    {
+        return __('stock::common.group');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('stock::warehouse.title');
+    }
+
+    public static function canAccess(): bool
+    {
+        return Gate::allows('acl', 'stock');
+    }
+
+    public static function form(Schema $schema): Schema
+    {
+        return $schema->components([
+            Forms\Components\TextInput::make('name')
+                ->label(__('stock::warehouse.form.name'))
+                ->required()
+                ->maxLength(255),
+            Forms\Components\Textarea::make('description')
+                ->label(__('stock::warehouse.form.description')),
+        ])->columns(1);
+    }
+
+    public static function table(Table $table): Table
+    {
+        return $table
+            ->columns([
+                TextColumn::make('name')->label(__('stock::warehouse.table.name'))->searchable()->sortable(),
+                TextColumn::make('description')->label(__('stock::warehouse.table.description')),
+            ])
+            ->actions([
+                Action::make('products')
+                    ->label('Termékek')
+                    ->icon('heroicon-o-cube')
+                    ->url(function ($record) {
+                        return 'warehouse-products?warehouse_id=' . $record->getKey();
+                    }),
+                EditAction::make(),
+                DeleteAction::make(),
+            ])
+            ->bulkActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
+                ]),
+            ]);
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => Pages\ListWarehouses::route('/'),
+            'create' => Pages\CreateWarehouse::route('/create'),
+            'edit' => Pages\EditWarehouse::route('/{record}/edit'),
+        ];
+    }
+}
