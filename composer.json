@@ -10,7 +10,9 @@
         }
     ],
     "minimum-stability": "dev",
-    "require": {},
+    "require": {
+        "istvanmolitor/product": "*@dev"
+    },
     "autoload": {
         "psr-4": {
             "Molitor\\Stock\\": "src/"
