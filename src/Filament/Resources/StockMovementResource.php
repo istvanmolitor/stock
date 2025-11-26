@@ -16,6 +16,7 @@ use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Actions\ViewAction;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Gate;
 use Molitor\Product\Models\Product;
@@ -162,6 +163,7 @@ class StockMovementResource extends Resource
             ->filters([
             ])
             ->actions([
+                ViewAction::make(),
                 EditAction::make()
                     ->hidden(fn (StockMovement $record) => !is_null($record->closed_at)),
                 DeleteAction::make(),
@@ -178,6 +180,7 @@ class StockMovementResource extends Resource
         return [
             'index' => Pages\ListStockMovements::route('/'),
             'create' => Pages\CreateStockMovement::route('/create'),
+            'view' => Pages\ViewStockMovement::route('/{record}'),
             'edit' => Pages\EditStockMovement::route('/{record}/edit'),
         ];
     }
