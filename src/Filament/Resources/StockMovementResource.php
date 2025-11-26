@@ -47,7 +47,6 @@ class StockMovementResource extends Resource
 
     public static function canEdit(Model $record): bool
     {
-        // Lezárt (closed_at nem null) készletmozgás nem szerkeszthető
         return is_null($record->closed_at);
     }
 
@@ -67,7 +66,6 @@ class StockMovementResource extends Resource
                     ->preload()
                     ->reactive()
                     ->afterStateUpdated(function ($state, callable $set) {
-                        // Reset warehouse_region_id in all repeater items when warehouse changes
                         $set('stockMovementItems', []);
                     }),
             ]),
@@ -114,7 +112,7 @@ class StockMovementResource extends Resource
                                     $query->where('warehouse_id', $warehouseId);
                                 }
                                 else {
-                                    $query->whereRaw('1 = 0'); // No results
+                                    $query->whereRaw('1 = 0');
                                 }
                             })
                             ->required()
@@ -123,6 +121,8 @@ class StockMovementResource extends Resource
                     ]),
                 ])
                 ->columns(1)
+                ->required()
+                ->minItems(1)
                 ->defaultItems(1)
                 ->addActionLabel(__('stock::common.add_item')),
         ])->columns(1);

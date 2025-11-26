@@ -4,6 +4,11 @@ namespace Molitor\Stock\Filament\Resources\StockMovementResource\Pages;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 use Molitor\Stock\Filament\Resources\StockMovementResource;
+use Illuminate\Support\Facades\DB;
+use Molitor\Stock\Enums\StockMovementType;
+use Molitor\Stock\Models\Stock;
+use Filament\Notifications\Notification;
+use Filament\Support\Exceptions\Halt;
 
 class EditStockMovement extends EditRecord
 {
@@ -22,14 +27,103 @@ class EditStockMovement extends EditRecord
 
     protected function saveAndClose(): void
     {
-        $data = $this->form->getState();
-        $data['closed_at'] = now();
+        DB::transaction(function () {
+            $data = $this->form->getState();
+            $data['closed_at'] = now();
 
-        // Filament v3: handleRecordUpdate expects the record as first argument, then the data array
-        $this->record = $this->handleRecordUpdate($this->record, $data);
+            // Filament v3: handleRecordUpdate expects the record as first argument, then the data array
+            $this->record = $this->handleRecordUpdate($this->record, $data);
 
-        // Save relations like repeater items
-        $this->form->model($this->record)->saveRelationships();
+            // Save relations like repeater items
+            $this->form->model($this->record)->saveRelationships();
+
+            // Ha a készletmozgás bejövő és lezárjuk, akkor könyveljük a stocks táblába
+            if ($this->record->type === StockMovementType::In) {
+                $this->record->load('stockMovementItems');
+
+                foreach ($this->record->stockMovementItems as $item) {
+                    // Minimális védelem a hiányos adatok ellen
+                    if (empty($item->warehouse_region_id) || empty($item->product_id)) {
+                        continue;
+                    }
+
+                    // Sor zárolása a versenyhelyzetek elkerülésére
+                    $stock = Stock::where('warehouse_region_id', $item->warehouse_region_id)
+                        ->where('product_id', $item->product_id)
+                        ->lockForUpdate()
+                        ->first();
+
+                    if ($stock) {
+                        $stock->quantity = (float) $stock->quantity + (float) $item->quantity;
+                        $stock->save();
+                    } else {
+                        Stock::create([
+                            'warehouse_region_id' => $item->warehouse_region_id,
+                            'product_id' => $item->product_id,
+                            'quantity' => $item->quantity,
+                        ]);
+                    }
+                }
+            } elseif ($this->record->type === StockMovementType::Out) {
+                // Kimenő mozgás: csak akkor csökkentsük a készletet, ha elegendő van minden tételből
+                $this->record->load(['stockMovementItems.product', 'stockMovementItems.warehouseRegion']);
+
+                $shortages = [];
+
+                foreach ($this->record->stockMovementItems as $item) {
+                    if (empty($item->warehouse_region_id) || empty($item->product_id)) {
+                        continue;
+                    }
+
+                    $stock = Stock::where('warehouse_region_id', $item->warehouse_region_id)
+                        ->where('product_id', $item->product_id)
+                        ->lockForUpdate()
+                        ->first();
+
+                    $available = $stock ? (float) $stock->quantity : 0.0;
+                    $requested = (float) $item->quantity;
+
+                    if ($available < $requested) {
+                        $missing = $requested - $available;
+                        // Avoid casting Optional to string; cast the underlying model or null directly
+                        $productName = (string) ($item->product ?? '');
+                        $regionName = (string) optional($item->warehouseRegion)->name;
+                        $shortages[] = "- {$productName} @ {$regionName}: hiányzik " . rtrim(rtrim(number_format($missing, 4, '.', ''), '0'), '.') ;
+                    }
+                }
+
+                if (! empty($shortages)) {
+                    Notification::make()
+                        ->title('Nincs elegendő készlet')
+                        ->body("Az alábbi tételeknél nincs elegendő készlet, a lezárás nem történt meg:\n" . implode("\n", $shortages))
+                        ->danger()
+                        ->send();
+
+                    // Megállítjuk az akciót és visszagörgetünk mindent (beleértve a closed_at mentését is)
+                    throw new Halt();
+                }
+
+                // Minden tételhez elegendő készlet van: csökkentjük
+                foreach ($this->record->stockMovementItems as $item) {
+                    if (empty($item->warehouse_region_id) || empty($item->product_id)) {
+                        continue;
+                    }
+
+                    $stock = Stock::where('warehouse_region_id', $item->warehouse_region_id)
+                        ->where('product_id', $item->product_id)
+                        ->lockForUpdate()
+                        ->first();
+
+                    $available = $stock ? (float) $stock->quantity : 0.0;
+                    $requested = (float) $item->quantity;
+
+                    if ($stock) {
+                        $stock->quantity = max(0.0, $available - $requested);
+                        $stock->save();
+                    }
+                }
+            }
+        });
 
         $this->redirect($this->getRedirectUrl());
     }

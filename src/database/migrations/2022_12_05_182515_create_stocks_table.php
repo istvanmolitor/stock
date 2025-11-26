@@ -14,9 +14,6 @@ class CreateStocksTable extends Migration
     public function up()
     {
         Schema::create('stocks', function (Blueprint $table) {
-
-            $table->id();
-
             $table->unsignedBigInteger('warehouse_region_id');
             $table->foreign('warehouse_region_id')->references('id')->on('warehouse_regions');
 
@@ -24,6 +21,8 @@ class CreateStocksTable extends Migration
             $table->foreign('product_id')->references('id')->on('products');
 
             $table->decimal('quantity');
+
+            $table->primary(['warehouse_region_id', 'product_id']);
         });
     }
 

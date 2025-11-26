@@ -9,6 +9,8 @@ use Molitor\Stock\Repositories\StockMovementItemRepository;
 use Molitor\Stock\Repositories\StockMovementItemRepositoryInterface;
 use Molitor\Stock\Repositories\StockMovementRepository;
 use Molitor\Stock\Repositories\StockMovementRepositoryInterface;
+use Molitor\Stock\Repositories\StockRepository;
+use Molitor\Stock\Repositories\StockRepositoryInterface;
 use Molitor\Stock\Repositories\WarehouseRegionRepository;
 use Molitor\Stock\Repositories\WarehouseRegionRepositoryInterface;
 use Molitor\Stock\Repositories\WarehouseRepository;
@@ -39,5 +41,6 @@ class StockServiceProvider extends ServiceProvider
         $this->app->bind(WarehouseRegionRepositoryInterface::class, WarehouseRegionRepository::class);
         $this->app->bind(StockMovementRepositoryInterface::class, StockMovementRepository::class);
         $this->app->bind(StockMovementItemRepositoryInterface::class, StockMovementItemRepository::class);
+        $this->app->bind(StockRepositoryInterface::class, StockRepository::class);
     }
 }
