@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Molitor\Stock\Enums\StockMovementType;
 
 class StockMovement extends Model
 {
@@ -20,6 +21,10 @@ class StockMovement extends Model
         'linked_stock_movement_id',
         'description',
         'closed_at',
+    ];
+
+    protected $casts = [
+        'type' => StockMovementType::class,
     ];
 
     protected static function booted(): void

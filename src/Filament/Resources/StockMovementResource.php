@@ -13,12 +13,15 @@ use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Schema;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Gate;
 use Molitor\Product\Models\Product;
 use Molitor\Stock\Filament\Resources\StockMovementResource\Pages;
 use Molitor\Stock\Models\StockMovement;
+use Molitor\Stock\Enums\StockMovementType;
 
 class StockMovementResource extends Resource
 {
@@ -41,17 +44,19 @@ class StockMovementResource extends Resource
         return Gate::allows('acl', 'stock_movement');
     }
 
+    public static function canEdit(Model $record): bool
+    {
+        // Lezárt (closed_at nem null) készletmozgás nem szerkeszthető
+        return is_null($record->closed_at);
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema->components([
             Grid::make(3)->schema([
                 Select::make('type')
                     ->label(__('stock::common.type'))
-                    ->options([
-                        'in' => __('stock::common.type_in'),
-                        'out' => __('stock::common.type_out'),
-                        'transfer' => __('stock::common.type_transfer'),
-                    ])
+                    ->options(StockMovementType::options())
                     ->required(),
                 Select::make('warehouse_id')
                     ->label(__('stock::common.warehouse'))
@@ -126,14 +131,39 @@ class StockMovementResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('code')->label(__('stock::common.code'))->searchable()->sortable(),
-                TextColumn::make('customer.name')->label(__('stock::common.customer'))->sortable(),
-                TextColumn::make('orderStatus')->label(__('stock::common.status')),
+                TextColumn::make('type')
+                    ->label(__('stock::common.type'))
+                    ->formatStateUsing(function ($state) {
+                        if ($state instanceof \BackedEnum) {
+                            return method_exists($state, 'label') ? $state->label() : $state->value;
+                        }
+                        try {
+                            return StockMovementType::from($state)->label();
+                        } catch (\Throwable $e) {
+                            return (string) $state;
+                        }
+                    })
+                    ->sortable(),
+                TextColumn::make('warehouse.name')
+                    ->label(__('stock::common.warehouse'))
+                    ->sortable()
+                    ->searchable(),
+                TextColumn::make('description')
+                    ->label(__('stock::common.description'))
+                    ->limit(50)
+                    ->wrap()
+                    ->sortable()
+                    ->searchable(),
+                TextColumn::make('closed_at')
+                    ->label(__('stock::common.closed_at'))
+                    ->dateTime()
+                    ->sortable(),
             ])
             ->filters([
             ])
             ->actions([
-                EditAction::make(),
+                EditAction::make()
+                    ->hidden(fn (StockMovement $record) => !is_null($record->closed_at)),
                 DeleteAction::make(),
             ])
             ->bulkActions([
