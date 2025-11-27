@@ -50,6 +50,11 @@ class StockMovementResource extends Resource
         return is_null($record->closed_at);
     }
 
+    public static function canDelete(Model $record): bool
+    {
+        return is_null($record->closed_at);
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema->components([
@@ -170,12 +175,10 @@ class StockMovementResource extends Resource
                 ViewAction::make(),
                 EditAction::make()
                     ->hidden(fn (StockMovement $record) => !is_null($record->closed_at)),
-                DeleteAction::make(),
+                DeleteAction::make()
+                    ->hidden(fn (StockMovement $record) => !is_null($record->closed_at)),
             ])
             ->bulkActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                ]),
             ]);
     }
 

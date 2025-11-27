@@ -2,12 +2,7 @@
 
 namespace Molitor\Stock\Filament\Resources\WarehouseRegionResource\Pages;
 
-use Filament\Actions\CreateAction;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\EditAction;
-use Filament\Forms;
 use Filament\Resources\Pages\ManageRelatedRecords;
-use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Molitor\Stock\Filament\Resources\WarehouseRegionResource;
@@ -46,7 +41,7 @@ class InventoryWarehouseRegion extends ManageRelatedRecords
             ->actions([
             ])
             ->bulkActions([
-                
+
             ]);
     }
 }
