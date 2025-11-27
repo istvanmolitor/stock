@@ -2,12 +2,10 @@
 
 namespace Molitor\Stock\Filament\Resources;
 
-use Filament\Panel;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\ImageColumn;
 use Illuminate\Support\Facades\Gate;
 use Molitor\Product\Models\Product;
 use Molitor\Stock\Filament\Resources\ProductResource\Pages;
