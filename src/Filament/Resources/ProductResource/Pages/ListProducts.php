@@ -40,6 +40,13 @@ class ListProducts extends ListRecords
 
     public function getTitle(): string
     {
+        if($this->filter instanceof Warehouse) {
+            return __('stock::common.warehouse') . ': ' . $this->filter;
+        }
+        if($this->filter instanceof WarehouseRegion) {
+            return __('stock::common.warehouse_region') . ': ' . $this->filter;
+        }
+
         return __('stock::stock.title');
     }
 
@@ -69,9 +76,9 @@ class ListProducts extends ListRecords
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('id')
-                    ->label(__('stock::product.table.id_hash'))
-                    ->formatStateUsing(function($state, $record) use ($stockRepository) {
-                        return $stockRepository->getQuantity($this->filter, $record);
+                    ->label(__('stock::common.quantity'))
+                    ->formatStateUsing(function($record) use ($stockRepository) {
+                        return $stockRepository->getQuantity($this->filter, $record) . ' ' . $record->productUnit;
                     }),
             ]);
     }
@@ -82,21 +89,15 @@ class ListProducts extends ListRecords
 
         if($this->filter) {
             if($this->filter instanceof Warehouse) {
-                $query->whereExists(function ($query) {
-                    $query->select(DB::raw(1))
-                        ->from('stocks')
-                        ->join('warehouse_regions as wr', 'wr.id', '=', 'stocks.warehouse_region_id')
-                        ->whereColumn('stocks.product_id', 'products.id')
-                        ->where('wr.warehouse_id', $this->filter->id);
-                });
+                $subQuery = DB::table('stocks as s')
+                    ->join('warehouse_regions as wr', 'wr.id', '=', 's.warehouse_region_id')
+                    ->where('wr.warehouse_id', $this->filter->id)
+                    ->select('s.product_id');
             } elseif($this->filter instanceof WarehouseRegion) {
-                $query->whereExists(function ($query) {
-                    $query->select(DB::raw(1))
-                        ->from('stocks')
-                        ->whereColumn('stocks.product_id', 'products.id')
-                        ->where('stocks.warehouse_region_id', $this->filter->id);
-                });
+                $subQuery = DB::table('stocks as s')->where('s.warehouse_region_id', $this->filter->id)
+                    ->select('s.product_id');
             }
+            return $query->joinSub($subQuery, 'sub', 'products.id', '=', 'sub.product_id');
         }
 
         return $query;
