@@ -198,6 +198,7 @@ class StockMovementResource extends Resource
             ])
             ->filters([
             ])
+            ->defaultSort('closed_at', 'asc')
             ->actions([
                 ViewAction::make(),
                 EditAction::make()
