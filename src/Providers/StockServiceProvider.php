@@ -22,6 +22,7 @@ class StockServiceProvider extends ServiceProvider
     {
         $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
         $this->loadTranslationsFrom(__DIR__ . '/../../resources/lang', 'stock');
+        $this->loadViewsFrom(__DIR__ . '/../../resources/views', 'stock');
 
         if (class_exists(Product::class)) {
             Product::resolveRelationUsing('warehouseRegions', function (Product $product) {

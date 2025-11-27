@@ -10,6 +10,7 @@ use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Placeholder;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Schema;
@@ -18,6 +19,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Actions\ViewAction;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\HtmlString;
 use Illuminate\Support\Facades\Gate;
 use Molitor\Product\Models\Product;
 use Molitor\Stock\Filament\Resources\StockMovementResource\Pages;
@@ -62,7 +64,11 @@ class StockMovementResource extends Resource
                 Select::make('type')
                     ->label(__('stock::common.type'))
                     ->options(StockMovementType::options())
-                    ->required(),
+                    ->required()
+                    ->disabled(function (callable $get, ?Model $record) {
+                        $linked = $get('linked_stock_movement_id');
+                        return ! empty($linked) || ! is_null($record?->linked_stock_movement_id);
+                    }),
                 Select::make('warehouse_id')
                     ->label(__('stock::common.warehouse'))
                     ->relationship('warehouse', 'name')
@@ -72,6 +78,23 @@ class StockMovementResource extends Resource
                     ->reactive()
                     ->afterStateUpdated(function ($state, callable $set) {
                         $set('stockMovementItems', []);
+                    }),
+                Placeholder::make('linked_stock_movement_link')
+                    ->label(__('stock::common.linked_stock_movement'))
+                    ->content(function (callable $get, ?Model $record) {
+                        $linkedId = $get('linked_stock_movement_id') ?? $record?->linked_stock_movement_id;
+                        if (empty($linkedId)) {
+                            return null;
+                        }
+                        $url = Pages\ViewStockMovement::getUrl(['record' => $linkedId]);
+                        return new HtmlString(view('stock::components.linked-stock-movement', [
+                            'url' => $url,
+                            'id' => $linkedId,
+                        ])->render());
+                    })
+                    ->visible(function (callable $get, ?Model $record) {
+                        $linkedId = $get('linked_stock_movement_id') ?? $record?->linked_stock_movement_id;
+                        return ! empty($linkedId);
                     }),
             ]),
             Textarea::make('description')
