@@ -7,7 +7,7 @@ use Molitor\Stock\Models\StockMovement;
 use Molitor\Stock\Models\StockMovementItem;
 use Molitor\Stock\Repositories\StockRepositoryInterface;
 
-class StockService
+class StockMovementService
 {
     public function __construct(
         protected StockRepositoryInterface $stockRepository,

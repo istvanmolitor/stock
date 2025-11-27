@@ -5,10 +5,10 @@ use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
 use Molitor\Stock\Filament\Resources\StockMovementResource;
 use Illuminate\Support\Facades\DB;
-use Molitor\Stock\Enums\StockMovementType;
-use Molitor\Stock\Models\Stock;
 use Filament\Notifications\Notification;
 use Filament\Support\Exceptions\Halt;
+use Molitor\Stock\Models\StockMovement;
+use Molitor\Stock\Services\StockMovementService;
 
 class CreateStockMovement extends CreateRecord
 {
@@ -27,96 +27,37 @@ class CreateStockMovement extends CreateRecord
 
     protected function saveAndClose(): void
     {
-        DB::transaction(function () {
-            $data = $this->form->getState();
-            $data['closed_at'] = now();
+        if(!$this->record) {
+            return;
+        }
 
-            $this->record = $this->handleRecordCreation($data);
+        /** @var StockMovement $stockMovement */
+        $stockMovement = $this->record;
 
-            $this->form->model($this->record)->saveRelationships();
-
-            if ($this->record->type === StockMovementType::In) {
-                $this->record->load('stockMovementItems');
-
-                foreach ($this->record->stockMovementItems as $item) {
-                    if (empty($item->warehouse_region_id) || empty($item->product_id)) {
-                        continue;
-                    }
-
-                    $stock = Stock::where('warehouse_region_id', $item->warehouse_region_id)
-                        ->where('product_id', $item->product_id)
-                        ->lockForUpdate()
-                        ->first();
-
-                    if ($stock) {
-                        $stock->quantity = (float) $stock->quantity + (float) $item->quantity;
-                        $stock->save();
-                    } else {
-                        Stock::create([
-                            'warehouse_region_id' => $item->warehouse_region_id,
-                            'product_id' => $item->product_id,
-                            'quantity' => $item->quantity,
-                        ]);
-                    }
-                }
-            } elseif ($this->record->type === StockMovementType::Out) {
-                $this->record->load(['stockMovementItems.product', 'stockMovementItems.warehouseRegion']);
+        DB::transaction(function () use ($stockMovement) {
+            /** @var StockMovementService $stockService */
+            $stockService = app(StockMovementService::class);
+            $errors = $stockService->execute($stockMovement);
+            if(count($errors)) {
 
                 $shortages = [];
-
-                foreach ($this->record->stockMovementItems as $item) {
-                    if (empty($item->warehouse_region_id) || empty($item->product_id)) {
-                        continue;
-                    }
-
-                    $stock = Stock::where('warehouse_region_id', $item->warehouse_region_id)
-                        ->where('product_id', $item->product_id)
-                        ->lockForUpdate()
-                        ->first();
-
-                    $available = $stock ? (float) $stock->quantity : 0.0;
-                    $requested = (float) $item->quantity;
-
-                    if ($available < $requested) {
-                        $missing = $requested - $available;
-                        // Avoid casting Optional to string; cast the underlying model or null directly
-                        $productName = (string) ($item->product ?? '');
-                        $regionName = (string) optional($item->warehouseRegion)->name;
-                        $shortages[] = "- {$productName} @ {$regionName}: hiányzik " . rtrim(rtrim(number_format($missing, 4, '.', ''), '0'), '.') ;
-                    }
+                foreach ($errors as $error) {
+                    $shortages[] = "- " . $error['product_name'] . " (" . $error['warehouse_region_name'] . "): szükséges mennyiség: " . $error['required_quantity'] . ", elérhető mennyiség: " . $error['available_quantity'];
                 }
 
-                if (! empty($shortages)) {
-                    Notification::make()
-                        ->title('Nincs elegendő készlet')
-                        ->body("Az alábbi tételeknél nincs elegendő készlet, a lezárás nem történt meg:\n" . implode("\n", $shortages))
-                        ->danger()
-                        ->send();
+                Notification::make()
+                    ->title('Nincs elegendő készlet')
+                    ->body("Az alábbi tételeknél nincs elegendő készlet, a lezárás nem történt meg:\n" . implode("\n", $shortages))
+                    ->danger()
+                    ->send();
 
-                    // Megállítjuk az akciót és visszagörgetünk mindent (beleértve a closed_at mentését is)
-                    throw new Halt();
-                }
-
-                // Minden tételhez elegendő készlet van: csökkentjük
-                foreach ($this->record->stockMovementItems as $item) {
-                    if (empty($item->warehouse_region_id) || empty($item->product_id)) {
-                        continue;
-                    }
-
-                    $stock = Stock::where('warehouse_region_id', $item->warehouse_region_id)
-                        ->where('product_id', $item->product_id)
-                        ->lockForUpdate()
-                        ->first();
-
-                    $available = $stock ? (float) $stock->quantity : 0.0;
-                    $requested = (float) $item->quantity;
-
-                    // Itt már biztosan elegendő, biztonsági okból max(0) nem engedjük negatívra
-                    if ($stock) {
-                        $stock->quantity = max(0.0, $available - $requested);
-                        $stock->save();
-                    }
-                }
+                throw new Halt();
+            }
+            else {
+                Notification::make()
+                    ->title('OK')
+                    ->success()
+                    ->send();
             }
         });
 
