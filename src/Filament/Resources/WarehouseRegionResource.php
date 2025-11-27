@@ -66,10 +66,6 @@ class WarehouseRegionResource extends Resource
                 TextColumn::make('description')->label(__('stock::warehouse_region.table.description')),
             ])
             ->actions([
-                Action::make('inventory')
-                    ->label(__('stock::warehouse_region.stocks.title'))
-                    ->url(fn ($record) => static::getUrl('inventory', ['record' => $record]))
-                    ->icon('heroicon-o-clipboard-document-list'),
                 ViewAction::make(),
                 EditAction::make(),
                 DeleteAction::make(),
@@ -92,7 +88,6 @@ class WarehouseRegionResource extends Resource
             'index' => Pages\ListWarehouseRegions::route('/'),
             'create' => Pages\CreateWarehouseRegion::route('/create'),
             'view' => Pages\ViewWarehouseRegion::route('/{record}'),
-            'inventory' => Pages\InventoryWarehouseRegion::route('/{record}/inventory'),
             'edit' => Pages\EditWarehouseRegion::route('/{record}/edit'),
         ];
     }
