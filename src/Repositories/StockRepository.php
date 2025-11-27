@@ -4,6 +4,7 @@ namespace Molitor\Stock\Repositories;
 
 use Molitor\Product\Models\Product;
 use Molitor\Stock\Models\Stock;
+use Molitor\Stock\Models\Warehouse;
 use Molitor\Stock\Models\WarehouseRegion;
 
 class StockRepository implements StockRepositoryInterface
@@ -15,11 +16,21 @@ class StockRepository implements StockRepositoryInterface
         $this->stock = new Stock();
     }
 
-    public function getQuantity(WarehouseRegion $warehouseRegion, Product $product): int
+    public function getQuantity(WarehouseRegion|Warehouse|null $location, Product $product): int
     {
-        return (int)$this->stock->where('warehouse_region_id', $warehouseRegion->id)
-            ->where('product_id', $product->id)
-            ->value('quantity');
+        if($location instanceof Warehouse) {
+            return (int)$this->stock->where('warehouse_regions.warehouse_id', $location->id)
+                ->join('warehouse_regions', 'warehouse_regions.id', '=', 'stocks.warehouse_region_id')
+                ->where('product_id', $product->id)
+                ->value('quantity');
+        }
+
+        if($location instanceof WarehouseRegion) {
+            return (int)$this->stock->where('warehouse_region_id', $location->id)
+                ->where('product_id', $product->id)
+                ->value('quantity');
+        }
+        return 0;
     }
 
     public function exists(WarehouseRegion $warehouseRegion, Product $product): bool

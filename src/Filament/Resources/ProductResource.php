@@ -46,21 +46,7 @@ class ProductResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->columns([
-                Tables\Columns\ImageColumn::make('mainImage.image')
-                    ->label(__('product::common.image'))
-                    ->size(100)
-                    ->disk('public')
-                    ->toggleable(),
-                TextColumn::make('sku')
-                    ->label(__('stock::product.table.sku'))
-                    ->searchable()
-                    ->sortable(),
-                TextColumn::make('translation.name')
-                    ->label(__('stock::product.table.name'))
-                    ->searchable()
-                    ->sortable(),
-            ])
+            ->columns([])
             ->defaultSort('sku')
             ->actions([])
             ->bulkActions([]);
