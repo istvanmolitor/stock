@@ -4,17 +4,14 @@ namespace Molitor\Stock\Filament\Resources\StockMovementResource\Pages;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 use Molitor\Stock\Filament\Resources\StockMovementResource;
-use Illuminate\Support\Facades\DB;
-use Molitor\Stock\Enums\StockMovementType;
-use Molitor\Stock\Models\Stock;
-use Filament\Notifications\Notification;
 use Filament\Support\Exceptions\Halt;
 use Molitor\Stock\Models\StockMovement;
-use Molitor\Stock\Models\WarehouseRegion;
-use Molitor\Stock\Services\StockMovementService;
+use Molitor\Stock\Filament\Resources\StockMovementResource\Pages\Concerns\HandlesStockMovementExecution;
 
 class EditStockMovement extends EditRecord
 {
+    use HandlesStockMovementExecution;
+
     protected static string $resource = StockMovementResource::class;
 
     protected function getFormActions(): array
@@ -30,35 +27,12 @@ class EditStockMovement extends EditRecord
 
     protected function saveAndClose(): void
     {
+       $this->save();
+
         /** @var StockMovement $stockMovement */
         $stockMovement = $this->record;
 
-        DB::transaction(function () use ($stockMovement) {
-            /** @var StockMovementService $stockService */
-            $stockService = app(StockMovementService::class);
-            $errors = $stockService->execute($stockMovement);
-            if(count($errors)) {
-
-                $shortages = [];
-                foreach ($errors as $error) {
-                    $shortages[] = "- " . $error['product_name'] . " (" . $error['warehouse_region_name'] . "): szükséges mennyiség: " . $error['required_quantity'] . ", elérhető mennyiség: " . $error['available_quantity'];
-                }
-
-                Notification::make()
-                    ->title('Nincs elegendő készlet')
-                    ->body("Az alábbi tételeknél nincs elegendő készlet, a lezárás nem történt meg:\n" . implode("\n", $shortages))
-                    ->danger()
-                    ->send();
-
-                throw new Halt();
-            }
-            else {
-                Notification::make()
-                    ->title('OK')
-                    ->success()
-                    ->send();
-            }
-        });
+        $this->executeStockMovementAndNotify($stockMovement);
 
         $this->redirect($this->getRedirectUrl());
     }
