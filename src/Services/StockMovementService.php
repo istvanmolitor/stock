@@ -15,6 +15,12 @@ class StockMovementService
     {
     }
 
+    public function close(StockMovement $stockMovement): void
+    {
+        $stockMovement->closed_at = now();
+        $stockMovement->save();
+    }
+
     public function execute(StockMovement $stockMovement): array
     {
         if ($stockMovement->type === StockMovementType::In) {
@@ -42,10 +48,12 @@ class StockMovementService
                 $currentQuantity + $stockMovementItem->quantity
             );
         }
+        $this->close($stockMovement);
     }
 
     private function validateDecrease(StockMovement $stockMovement): array
     {
+        $errors = [];
         foreach ($stockMovement->stockMovementItems as $stockMovementItem) {
             $product = $stockMovementItem->product;
             $warehouseRegion = $stockMovementItem->warehouseRegion;
@@ -85,6 +93,7 @@ class StockMovementService
                 $currentQuantity - $stockMovementItem->quantity
             );
         }
+        $this->close($stockMovement);
         return [];
     }
 

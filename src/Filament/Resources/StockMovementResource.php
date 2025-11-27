@@ -15,6 +15,7 @@ use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Actions\ViewAction;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Gate;
@@ -154,6 +155,10 @@ class StockMovementResource extends Resource
                     ->wrap()
                     ->sortable()
                     ->searchable(),
+                IconColumn::make('is_closed')
+                    ->label('Lezárva')
+                    ->boolean()
+                    ->state(fn (StockMovement $record) => ! is_null($record->closed_at)),
                 TextColumn::make('closed_at')
                     ->label(__('stock::common.closed_at'))
                     ->dateTime()
