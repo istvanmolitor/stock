@@ -3,9 +3,7 @@
 namespace Molitor\Stock\Filament\Resources;
 
 use Filament\Resources\Resource;
-use Filament\Tables;
 use Filament\Tables\Table;
-use Filament\Tables\Columns\TextColumn;
 use Illuminate\Support\Facades\Gate;
 use Molitor\Product\Models\Product;
 use Molitor\Stock\Filament\Resources\ProductResource\Pages;

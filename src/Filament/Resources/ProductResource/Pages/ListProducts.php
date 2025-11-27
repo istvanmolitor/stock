@@ -19,17 +19,25 @@ class ListProducts extends ListRecords
 
     protected Warehouse|WarehouseRegion|null $filter = null;
 
+    public ?int $warehouseRegionId = null;
+    public ?int $warehouseId = null;
+
     public function mount(): void
     {
         parent::mount();
 
-        $warehouseRegionId = request()->integer('warehouse_region_id');
-        if($warehouseRegionId) {
-            $this->filter = WarehouseRegion::findOrFail($warehouseRegionId);
-        }
-        $warehouseId = request()->integer('warehouse_id');
-        if($warehouseId) {
-            $this->filter = Warehouse::findOrFail($warehouseId);
+        $this->warehouseRegionId = request()->integer('warehouse_region_id') ?: null;
+        $this->warehouseId = request()->integer('warehouse_id') ?: null;
+
+        $this->loadFilter();
+    }
+
+    protected function loadFilter(): void
+    {
+        if($this->warehouseRegionId) {
+            $this->filter = WarehouseRegion::findOrFail($this->warehouseRegionId);
+        } elseif($this->warehouseId) {
+            $this->filter = Warehouse::findOrFail($this->warehouseId);
         }
     }
 
@@ -85,6 +93,8 @@ class ListProducts extends ListRecords
 
     protected function getTableQuery(): Builder
     {
+        $this->loadFilter();
+
         $query = parent::getTableQuery();
 
         if($this->filter) {
