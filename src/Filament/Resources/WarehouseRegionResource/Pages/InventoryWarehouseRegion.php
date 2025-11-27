@@ -42,44 +42,11 @@ class InventoryWarehouseRegion extends ManageRelatedRecords
                     ->sortable(),
             ])
             ->headerActions([
-                CreateAction::make()
-                    ->label(__('stock::warehouse_region.stocks.create'))
-                    ->form([
-                        Forms\Components\Select::make('product_id')
-                            ->label(__('stock::warehouse_region.stocks.product'))
-                            ->relationship('product', 'sku', modifyQueryUsing: function ($query) {
-                                $used = $this->getOwnerRecord()->stocks()->pluck('product_id');
-                                $query->whereNotIn('id', $used);
-                            })
-                            ->getOptionLabelFromRecordUsing(fn ($record) => (string) $record)
-                            ->searchable()
-                            ->preload()
-                            ->required(),
-                        Forms\Components\TextInput::make('quantity')
-                            ->label(__('stock::warehouse_region.stocks.quantity'))
-                            ->numeric()
-                            ->minValue(0)
-                            ->step('0.01')
-                            ->required(),
-                    ])
-                    ->mutateFormDataUsing(function (array $data): array {
-                        $data['warehouse_region_id'] = $this->getOwnerRecord()->id;
-                        return $data;
-                    }),
             ])
             ->actions([
-                EditAction::make()
-                    ->label(__('stock::common.edit'))
-                    ->form([
-                        Forms\Components\TextInput::make('quantity')
-                            ->label(__('stock::warehouse_region.stocks.quantity'))
-                            ->numeric()
-                            ->minValue(0)
-                            ->step('0.01')
-                            ->required(),
-                    ]),
-                DeleteAction::make(),
             ])
-            ->bulkActions([]);
+            ->bulkActions([
+                
+            ]);
     }
 }
