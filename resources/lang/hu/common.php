@@ -16,4 +16,5 @@ return [
     'quantity' => 'Mennyiség',
     'warehouse_region' => 'Raktárrégió',
     'add_item' => 'Tétel hozzáadása',
+    'stock' => 'Készlet',
 ];

@@ -17,7 +17,6 @@ use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Gate;
 use Molitor\Stock\Filament\Resources\WarehouseRegionResource\Pages;
 use Molitor\Stock\Models\WarehouseRegion;
-use Molitor\Stock\Filament\Resources\ProductResource;
 
 class WarehouseRegionResource extends Resource
 {

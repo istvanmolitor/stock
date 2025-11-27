@@ -16,6 +16,7 @@ use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Gate;
 use Molitor\Stock\Filament\Resources\WarehouseResource\Pages;
 use Molitor\Stock\Models\Warehouse;
+use Molitor\Stock\Models\WarehouseRegion;
 
 class WarehouseResource extends Resource
 {
@@ -58,12 +59,12 @@ class WarehouseResource extends Resource
                 TextColumn::make('description')->label(__('stock::warehouse.table.description')),
             ])
             ->actions([
-                Action::make('products')
-                    ->label('Termékek')
+                Action::make('id')
+                    ->label(__('stock::common.stock'))
                     ->icon('heroicon-o-cube')
-                    ->url(function ($record) {
-                        return 'warehouse-products?warehouse_id=' . $record->getKey();
-                    }),
+                    ->url(fn (Warehouse $record): string =>
+                        ProductResource::getUrl('index', ['warehouse_id' => $record->id])
+                    ),
                 EditAction::make(),
                 DeleteAction::make(),
             ])
