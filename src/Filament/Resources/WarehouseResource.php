@@ -48,6 +48,23 @@ class WarehouseResource extends Resource
                 ->maxLength(255),
             Forms\Components\Textarea::make('description')
                 ->label(__('stock::warehouse.form.description')),
+            Forms\Components\Repeater::make('regions')
+                ->label(__('stock::warehouse_region.title'))
+                ->relationship('regions')
+                ->schema([
+                    Forms\Components\TextInput::make('name')
+                        ->label(__('stock::warehouse_region.form.name'))
+                        ->required()
+                        ->maxLength(255),
+                    Forms\Components\Textarea::make('description')
+                        ->label(__('stock::warehouse_region.form.description')),
+                ])
+                ->columns(2)
+                ->collapsible()
+                ->itemLabel(fn (array $state): ?string => $state['name'] ?? null)
+                ->defaultItems(0)
+                ->addActionLabel(__('stock::warehouse_region.create'))
+                ->reorderable(false),
         ])->columns(1);
     }
 
