@@ -6,6 +6,7 @@ use Molitor\Stock\Enums\StockMovementType;
 use Molitor\Stock\Models\StockMovement;
 use Molitor\Stock\Models\StockMovementItem;
 use Molitor\Stock\Repositories\StockRepositoryInterface;
+use Molitor\Unas\Services\Endpoints\Auth;
 
 class StockMovementService
 {
@@ -18,6 +19,7 @@ class StockMovementService
     public function close(StockMovement $stockMovement): void
     {
         $stockMovement->closed_at = now();
+        $stockMovement->user_id = auth()->id();
         $stockMovement->save();
     }
 

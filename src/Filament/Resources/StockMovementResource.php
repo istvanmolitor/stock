@@ -173,6 +173,10 @@ class StockMovementResource extends Resource
                         }
                     })
                     ->sortable(),
+                TextColumn::make('user.name')
+                    ->label('Felhasználó')
+                    ->sortable()
+                    ->searchable(),
                 TextColumn::make('warehouse.name')
                     ->label(__('stock::common.warehouse'))
                     ->sortable()
