@@ -8,6 +8,7 @@ class WarehouseRegion extends Model
 {
     protected $fillable = [
         'warehouse_id',
+        'is_primary',
         'name',
         'description',
     ];

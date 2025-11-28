@@ -15,6 +15,7 @@ class CreateWarehousesTable extends Migration
     {
         Schema::create('warehouses', function (Blueprint $table) {
             $table->id();
+            $table->boolean('is_primary')->default(false);
             $table->string('name');
             $table->text('description')->nullable();
             $table->timestamps();

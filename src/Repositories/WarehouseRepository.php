@@ -57,4 +57,11 @@ class WarehouseRepository implements WarehouseRepositoryInterface
             'name' => $name,
         ]);
     }
+
+    public function setDefault(Warehouse $warehouse): void
+    {
+        $this->warehouse->where('id', '<>', $warehouse->id)->update(['is_primary' => false]);
+        $warehouse->is_primary = true;
+        $warehouse->save();
+    }
 }

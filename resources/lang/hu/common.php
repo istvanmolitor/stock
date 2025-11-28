@@ -27,4 +27,7 @@ return [
     'created_at' => 'Létrehozva',
     'updated_at' => 'Frissítve',
     'not_closed' => 'Nincs lezárva',
+    'default_warehouse_name' => 'Alapértelmezett raktár neve',
+    'default_warehouse_region_name' => 'Alapértelmezett régió neve',
+    'is_primary' => 'Elsődleges',
 ];

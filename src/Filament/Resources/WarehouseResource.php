@@ -42,6 +42,8 @@ class WarehouseResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return $schema->components([
+            Forms\Components\Toggle::make('is_primary')
+                ->label(__('stock::common.is_primary')),
             Forms\Components\TextInput::make('name')
                 ->label(__('stock::warehouse.form.name'))
                 ->required()
@@ -52,6 +54,8 @@ class WarehouseResource extends Resource
                 ->label(__('stock::warehouse_region.title'))
                 ->relationship('regions')
                 ->schema([
+                    Forms\Components\Toggle::make('is_primary')
+                        ->label(__('stock::common.is_primary')),
                     Forms\Components\TextInput::make('name')
                         ->label(__('stock::warehouse_region.form.name'))
                         ->required()

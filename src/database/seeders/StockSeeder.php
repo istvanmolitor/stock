@@ -27,21 +27,21 @@ class StockSeeder extends Seeder
             $this->command->error($e->getMessage());
         }
 
-        if(app()->isLocal()) {
-            $data = include __DIR__ . '/data/regions.php';
+        $data = include __DIR__ . '/data/regions.php';
 
-            foreach($data as $warehouseData) {
-                $warehouse = new Warehouse();
-                $warehouse->name = $warehouseData['name'];
-                $warehouse->description = $warehouseData['description'];
-                $warehouse->save();
+        foreach($data as $warehouseData) {
+            $warehouse = new Warehouse();
+            $warehouse->is_primary = $warehouseData['is_primary'];
+            $warehouse->name = $warehouseData['name'];
+            $warehouse->description = $warehouseData['description'];
+            $warehouse->save();
 
-                foreach($warehouseData['regions'] as $regionData) {
-                    $region = new WarehouseRegion();
-                    $region->warehouse_id = $warehouse->id;
-                    $region->name = $regionData['name'];
-                    $region->save();
-                }
+            foreach($warehouseData['regions'] as $regionData) {
+                $region = new WarehouseRegion();
+                $region->warehouse_id = $warehouse->id;
+                $region->is_primary = $regionData['is_primary'];
+                $region->name = $regionData['name'];
+                $region->save();
             }
         }
     }

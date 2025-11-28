@@ -4,6 +4,7 @@ namespace Molitor\Stock\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Molitor\Product\Models\Product;
+use Molitor\Setting\Services\SettingHandlerService;
 use Molitor\Stock\Models\WarehouseRegion;
 use Molitor\Stock\Repositories\StockMovementItemRepository;
 use Molitor\Stock\Repositories\StockMovementItemRepositoryInterface;
@@ -15,6 +16,7 @@ use Molitor\Stock\Repositories\WarehouseRegionRepository;
 use Molitor\Stock\Repositories\WarehouseRegionRepositoryInterface;
 use Molitor\Stock\Repositories\WarehouseRepository;
 use Molitor\Stock\Repositories\WarehouseRepositoryInterface;
+use Molitor\Stock\Services\StockSettingForm;
 
 class StockServiceProvider extends ServiceProvider
 {
@@ -34,6 +36,8 @@ class StockServiceProvider extends ServiceProvider
                 )->withPivot(['quantity']);
             });
         }
+
+        $this->app->make(SettingHandlerService::class)->register(StockSettingForm::class);
     }
 
     public function register()

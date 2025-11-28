@@ -20,6 +20,7 @@ class CreateWarehouseRegionsTable extends Migration
             $table->foreign('warehouse_id')->references('id')->on('warehouses');
 
             $table->string('name');
+            $table->boolean('is_primary')->default(false);
             $table->text('description')->nullable();
             $table->timestamps();
         });

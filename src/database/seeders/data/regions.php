@@ -4,24 +4,11 @@ return [
     [
         'name' => 'Fő telephely',
         'description' => 'A cég fő telephelye',
+        'is_primary' => true,
         'regions' => [
             [
-                'name' => 'Doboz 1',
-            ],
-            [
-                'name' => 'Doboz 2',
-            ],
-        ]
-    ],
-    [
-        'name' => 'Budapest',
-        'description' => 'Budapesti telephely',
-        'regions' => [
-            [
-                'name' => 'Polc 1',
-            ],
-            [
-                'name' => 'Polc 2',
+                'name' => 'Raktár',
+                'is_primary' => true,
             ],
         ]
     ],

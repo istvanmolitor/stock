@@ -48,6 +48,8 @@ class WarehouseRegionResource extends Resource
                 ->required()
                 ->searchable()
                 ->preload(),
+            Forms\Components\Toggle::make('is_primary')
+                ->label(__('stock::common.is_primary')),
             Forms\Components\TextInput::make('name')
                 ->label(__('stock::warehouse_region.form.name'))
                 ->required()
