@@ -48,4 +48,14 @@ class StockService
             $this->stockRepository->setQuantity($location, $product, $quantity);
         }
     }
+
+    public function moveStock(WarehouseRegion $source, WarehouseRegion $destionation, Product $product, int $quantity): void
+    {
+        $currentQuantity = $this->stockRepository->getQuantity($source, $product);
+        if($currentQuantity >= $quantity) {
+            $this->stockRepository->setQuantity($source, $product, $currentQuantity - $quantity);
+            $destinationQuantity = $this->stockRepository->getQuantity($destionation, $product);
+            $this->stockRepository->setQuantity($destionation, $product, $destinationQuantity + $quantity);
+        }
+    }
 }
