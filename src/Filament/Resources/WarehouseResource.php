@@ -3,9 +3,11 @@
 namespace Molitor\Stock\Filament\Resources;
 
 use Filament\Actions\Action;
+use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
 use Filament\Forms;
 use Filament\Tables;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Actions\DeleteAction;
@@ -42,7 +44,7 @@ class WarehouseResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return $schema->components([
-            Forms\Components\Toggle::make('is_primary')
+            Toggle::make('is_primary')
                 ->label(__('stock::common.is_primary')),
             Forms\Components\TextInput::make('name')
                 ->label(__('stock::warehouse.form.name'))
@@ -54,7 +56,7 @@ class WarehouseResource extends Resource
                 ->label(__('stock::warehouse_region.title'))
                 ->relationship('regions')
                 ->schema([
-                    Forms\Components\Toggle::make('is_primary')
+                    Toggle::make('is_primary')
                         ->label(__('stock::common.is_primary')),
                     Forms\Components\TextInput::make('name')
                         ->label(__('stock::warehouse_region.form.name'))
@@ -76,6 +78,7 @@ class WarehouseResource extends Resource
     {
         return $table
             ->columns([
+                IconColumn::make('is_primary')->label(__('stock::common.is_primary'))->boolean(),
                 TextColumn::make('name')->label(__('stock::warehouse.table.name'))->searchable()->sortable(),
                 TextColumn::make('description')->label(__('stock::warehouse.table.description')),
             ])
