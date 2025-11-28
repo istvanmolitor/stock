@@ -68,4 +68,14 @@ class WarehouseRegionRepository implements WarehouseRegionRepositoryInterface
         }
         return $this->getDefault($warehouse);
     }
+
+    public function setPrimary(WarehouseRegion $warehouseRegion): void
+    {
+        $this->warehouseRegion
+            ->where('warehouse_id', $warehouseRegion->warehouse_id)
+            ->where('id', '<>', $warehouseRegion->id)
+            ->update(['is_primary' => false]);
+        $warehouseRegion->is_primary = true;
+        $warehouseRegion->save();
+    }
 }

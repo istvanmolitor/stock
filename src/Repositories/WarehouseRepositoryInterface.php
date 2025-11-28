@@ -7,7 +7,7 @@ use Molitor\Stock\Models\Warehouse;
 
 interface WarehouseRepositoryInterface
 {
-    public function setDefault(Warehouse $warehouse): void;
+    public function setPrimary(Warehouse $warehouse): void;
 
     public function delete(Warehouse $warehouse): bool;
 

@@ -19,4 +19,6 @@ interface WarehouseRegionRepositoryInterface
     public function getDefault(Warehouse $warehouse): WarehouseRegion;
 
     public function getDefaultByProduct(Warehouse $warehouse, Product $product): WarehouseRegion;
+
+    public function setPrimary(WarehouseRegion $warehouseRegion): void;
 }
