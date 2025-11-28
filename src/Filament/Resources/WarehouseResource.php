@@ -90,13 +90,10 @@ class WarehouseResource extends Resource
                         ProductResource::getUrl('index', ['warehouse_id' => $record->id])
                     ),
                 EditAction::make(),
-                DeleteAction::make(),
+                DeleteAction::make()
+                    ->hidden(fn (Warehouse $record): bool => $record->is_primary),
             ])
-            ->bulkActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                ]),
-            ]);
+            ->bulkActions([]);
     }
 
     public static function getPages(): array

@@ -79,13 +79,10 @@ class WarehouseRegionResource extends Resource
                         ProductResource::getUrl('index', ['warehouse_region_id' => $record->id])
                     ),
                 EditAction::make(),
-                DeleteAction::make(),
+                DeleteAction::make()
+                    ->hidden(fn (WarehouseRegion $record): bool => $record->is_primary),
             ])
-            ->bulkActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                ]),
-            ]);
+            ->bulkActions([]);
     }
 
     public static function getRelations(): array
