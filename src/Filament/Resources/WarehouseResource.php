@@ -57,7 +57,8 @@ class WarehouseResource extends Resource
                 ->relationship('regions')
                 ->schema([
                     Toggle::make('is_primary')
-                        ->label(__('stock::common.is_primary')),
+                        ->label(__('stock::common.is_primary'))
+                        ->default(false),
                     Forms\Components\TextInput::make('name')
                         ->label(__('stock::warehouse_region.form.name'))
                         ->required()
@@ -68,7 +69,9 @@ class WarehouseResource extends Resource
                 ->columns(2)
                 ->collapsible()
                 ->itemLabel(fn (array $state): ?string => $state['name'] ?? null)
-                ->defaultItems(0)
+                ->defaultItems(1)
+                ->minItems(1)
+                ->required()
                 ->addActionLabel(__('stock::warehouse_region.create'))
                 ->reorderable(false),
         ])->columns(1);
