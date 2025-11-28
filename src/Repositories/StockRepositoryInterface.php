@@ -8,7 +8,11 @@ use Molitor\Stock\Models\WarehouseRegion;
 
 interface StockRepositoryInterface
 {
-    public function getQuantity(WarehouseRegion|Warehouse|null $place, Product $product): int|null;
+    public function getAllQuantity(Product $product): int;
+
+    public function getQuantityByWarehouse(Warehouse $warehouse, Product $product): int;
+
+    public function getQuantity(WarehouseRegion $warehouseRegion, Product $product): int;
 
     public function exists(WarehouseRegion $warehouseRegion, Product $product): bool;
 

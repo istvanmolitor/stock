@@ -16,21 +16,24 @@ class StockRepository implements StockRepositoryInterface
         $this->stock = new Stock();
     }
 
-    public function getQuantity(WarehouseRegion|Warehouse|null $location, Product $product): int
+    public function getAllQuantity(Product $product): int
     {
-        if($location instanceof Warehouse) {
-            return (int)$this->stock->where('warehouse_regions.warehouse_id', $location->id)
-                ->join('warehouse_regions', 'warehouse_regions.id', '=', 'stocks.warehouse_region_id')
-                ->where('product_id', $product->id)
-                ->value('quantity');
-        }
+        return (int)$this->stock->where('product_id', $product->id)->sum('quantity');
+    }
 
-        if($location instanceof WarehouseRegion) {
-            return (int)$this->stock->where('warehouse_region_id', $location->id)
-                ->where('product_id', $product->id)
-                ->value('quantity');
-        }
-        return 0;
+    public function getQuantityByWarehouse(Warehouse $warehouse, Product $product): int
+    {
+        return (int)$this->stock->where('warehouse_regions.warehouse_id', $warehouse->id)
+            ->join('warehouse_regions', 'warehouse_regions.id', '=', 'stocks.warehouse_region_id')
+            ->where('product_id', $product->id)
+            ->value('quantity');
+    }
+
+    public function getQuantity(WarehouseRegion $warehouseRegion, Product $product): int
+    {
+        return (int)$this->stock->where('warehouse_region_id', $warehouseRegion->id)
+            ->where('product_id', $product->id)
+            ->value('quantity');
     }
 
     public function exists(WarehouseRegion $warehouseRegion, Product $product): bool

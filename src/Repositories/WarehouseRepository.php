@@ -35,4 +35,26 @@ class WarehouseRepository implements WarehouseRepositoryInterface
     {
         return $this->warehouse->orderBy('name')->pluck('name', 'id')->toArray();
     }
+
+    public function getDefaultWarehouseName(): string
+    {
+        return 'Raktár';
+    }
+
+    public function getByName(string $name): Warehouse|null
+    {
+        return $this->warehouse->where('name', $name)->first();
+    }
+
+    public function getDefault(): Warehouse
+    {
+        $name = $this->getDefaultWarehouseName();
+        $defaultWarehouse = $this->getByName($name);
+        if($defaultWarehouse) {
+            return $defaultWarehouse;
+        }
+        return $this->warehouse->create([
+            'name' => $name,
+        ]);
+    }
 }

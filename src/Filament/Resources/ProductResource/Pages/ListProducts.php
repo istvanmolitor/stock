@@ -12,6 +12,7 @@ use Molitor\Stock\Filament\Resources\ProductResource;
 use Molitor\Stock\Models\Warehouse;
 use Molitor\Stock\Models\WarehouseRegion;
 use Molitor\Stock\Repositories\StockRepositoryInterface;
+use Molitor\Stock\Services\StockService;
 
 class ListProducts extends ListRecords
 {
@@ -65,8 +66,8 @@ class ListProducts extends ListRecords
 
     public function table(Table $table): Table
     {
-        /** @var StockRepositoryInterface $stockRepositoryInterface */
-        $stockRepository = app(StockRepositoryInterface::class);
+        /** @var StockService $stockService */
+        $stockService = app(StockService::class);
 
         return $table
             ->columns([
@@ -85,8 +86,8 @@ class ListProducts extends ListRecords
                     ->sortable(),
                 TextColumn::make('id')
                     ->label(__('stock::common.quantity'))
-                    ->formatStateUsing(function($record) use ($stockRepository) {
-                        return $stockRepository->getQuantity($this->filter, $record) . ' ' . $record->productUnit;
+                    ->formatStateUsing(function($record) use ($stockService) {
+                        return $stockService->getStock($this->filter, $record) . ' ' . $record->productUnit;
                     }),
             ]);
     }
