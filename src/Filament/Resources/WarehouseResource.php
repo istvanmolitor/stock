@@ -70,6 +70,12 @@ class WarehouseResource extends Resource
                     ->url(fn (Warehouse $record): string =>
                         ProductResource::getUrl('index', ['warehouse_id' => $record->id])
                     ),
+                Action::make('move_stock')
+                    ->label(__('stock::warehouse.move_stock'))
+                    ->icon('heroicon-o-arrow-path')
+                    ->url(fn (Warehouse $record): string =>
+                        self::getUrl('move-stock', ['record' => $record])
+                    ),
                 EditAction::make(),
                 DeleteAction::make()
                     ->hidden(fn (Warehouse $record): bool => $record->is_primary),
@@ -83,6 +89,7 @@ class WarehouseResource extends Resource
             'index' => Pages\ListWarehouses::route('/'),
             'create' => Pages\CreateWarehouse::route('/create'),
             'edit' => Pages\EditWarehouse::route('/{record}/edit'),
+            'move-stock' => Pages\MoveStock::route('/{record}/move-stock'),
         ];
     }
 }
