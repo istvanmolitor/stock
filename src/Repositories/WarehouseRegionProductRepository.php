@@ -3,21 +3,22 @@
 namespace Molitor\Stock\Repositories;
 
 use Molitor\Product\Models\Product;
-use Molitor\Stock\Models\WarehouseRegionProductSetting;
+use Molitor\Stock\Models\Warehouse;
+use Molitor\Stock\Models\WarehouseRegionProduct;
 use Molitor\Stock\Models\WarehouseRegion;
 
-class WarehouseRegionProductRepository implements StockThreswarehouseRegionRepositoryInterface
+class WarehouseRegionProductRepository implements WarehouseRegionProductRepositoryInterface
 {
-    protected WarehouseRegionProductSetting $model;
+    protected WarehouseRegionProduct $warehouseRegionProduct;
 
     public function __construct()
     {
-        $this->model = new WarehouseRegionProductSetting();
+        $this->warehouseRegionProduct = new WarehouseRegionProduct();
     }
 
-    public function get(WarehouseRegion $warehouseRegion, Product $product): ?WarehouseRegionProductSetting
+    public function get(WarehouseRegion $warehouseRegion, Product $product): WarehouseRegionProduct|null
     {
-        return $this->model->where('warehouse_region_id', $warehouseRegion->id)
+        return $this->warehouseRegionProduct->where('warehouse_region_id', $warehouseRegion->id)
             ->where('product_id', $product->id)
             ->first();
     }
@@ -27,7 +28,7 @@ class WarehouseRegionProductRepository implements StockThreswarehouseRegionRepos
         Product $product,
         ?float $minQuantity,
         ?float $maxQuantity
-    ): WarehouseRegionProductSetting {
+    ): WarehouseRegionProduct {
         $existing = $this->get($warehouseRegion, $product);
 
         if ($existing) {
@@ -38,7 +39,7 @@ class WarehouseRegionProductRepository implements StockThreswarehouseRegionRepos
             return $existing;
         }
 
-        return $this->model->create([
+        return $this->warehouseRegionProduct->create([
             'warehouse_region_id' => $warehouseRegion->id,
             'product_id' => $product->id,
             'min_quantity' => $minQuantity,
@@ -48,8 +49,32 @@ class WarehouseRegionProductRepository implements StockThreswarehouseRegionRepos
 
     public function delete(WarehouseRegion $warehouseRegion, Product $product): void
     {
-        $this->model->where('warehouse_region_id', $warehouseRegion->id)
+        $this->warehouseRegionProduct->where('warehouse_region_id', $warehouseRegion->id)
             ->where('product_id', $product->id)
             ->delete();
+    }
+
+    public function getAllMinQuantity(Product $product): int
+    {
+        return (int) $this->warehouseRegionProduct
+            ->where('product_id', $product->id)
+            ->sum('min_quantity');
+    }
+
+    public function getMinQuantity(WarehouseRegion $location, Product $product): int
+    {
+        $record = $this->get($location, $product);
+
+        return (int) ($record->min_quantity ?? 0);
+    }
+
+    public function getMinQuantityByWarehouse(Warehouse $location, Product $product): int
+    {
+        return (int) $this->warehouseRegionProduct
+            ->where('product_id', $product->id)
+            ->whereHas('warehouseRegion', function ($q) use ($location) {
+                $q->where('warehouse_id', $location->id);
+            })
+            ->sum('min_quantity');
     }
 }
