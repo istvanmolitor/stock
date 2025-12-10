@@ -19,6 +19,8 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Gate;
 use Molitor\Stock\Filament\Resources\WarehouseRegionResource\Pages;
+use Molitor\Stock\Filament\Resources\WarehouseRegionResource\RelationManagers\StocksRelationManager;
+use Molitor\Stock\Filament\Resources\WarehouseRegionResource\RelationManagers\WarehouseRegionProductRelationManager;
 use Molitor\Stock\Models\WarehouseRegion;
 
 class WarehouseRegionResource extends Resource
@@ -87,7 +89,9 @@ class WarehouseRegionResource extends Resource
 
     public static function getRelations(): array
     {
-        return [];
+        return [
+            WarehouseRegionProductRelationManager::class,
+        ];
     }
 
     public static function getPages(): array
