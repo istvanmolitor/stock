@@ -4,7 +4,7 @@ namespace Molitor\Stock\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Molitor\Product\Models\Product;
-use Molitor\Setting\Services\SettingHandlerService;
+use Molitor\Setting\Services\SettingHandler;
 use Molitor\Stock\Models\WarehouseRegion;
 use Molitor\Stock\Repositories\StockMovementItemRepository;
 use Molitor\Stock\Repositories\StockMovementItemRepositoryInterface;
@@ -39,7 +39,7 @@ class StockServiceProvider extends ServiceProvider
             });
         }
 
-        $this->app->make(SettingHandlerService::class)->register(StockSettingForm::class);
+        $this->app->make(SettingHandler::class)->registerSettingForm(StockSettingForm::class);
     }
 
     public function register()

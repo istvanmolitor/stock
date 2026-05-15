@@ -7,7 +7,6 @@ use Molitor\Setting\Services\SettingForm;
 
 class StockSettingForm extends SettingForm
 {
-
     public function getSlug(): string
     {
         return 'stock';
@@ -32,7 +31,7 @@ class StockSettingForm extends SettingForm
         ];
     }
 
-    public function getDefaults(): array
+    public function getDefaultValues(): array
     {
         return [
             'default_warehouse_name' => 'Raktár',
@@ -40,7 +39,7 @@ class StockSettingForm extends SettingForm
         ];
     }
 
-    public function getFormFields(): array
+    public function getFields(): array
     {
         return [
             'default_warehouse_name',
