@@ -26,8 +26,7 @@ class StockMovementApiController extends Controller
 
     public function __construct(
         protected StockRepositoryInterface $stockRepository,
-    ) {
-    }
+    ) {}
 
     public function index(Request $request): JsonResponse
     {
@@ -35,7 +34,7 @@ class StockMovementApiController extends Controller
             ->with(['warehouse:id,name', 'user:id,name'])
             ->withCount('stockMovementItems as items_count');
 
-        $movements = $this->applyAdminFilters($query, $request, ['description'])
+        $movements = $this->applyAdminFilters($query, $request, ['description'], '')
             ->latest()
             ->paginate(15)
             ->withQueryString();
