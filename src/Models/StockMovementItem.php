@@ -17,6 +17,7 @@ class StockMovementItem extends Model
         'product_id',
         'quantity',
         'warehouse_region_id',
+        'destination_warehouse_region_id',
     ];
 
     public function stockMovement(): BelongsTo
@@ -32,5 +33,10 @@ class StockMovementItem extends Model
     public function warehouseRegion(): BelongsTo
     {
         return $this->belongsTo(WarehouseRegion::class, 'warehouse_region_id');
+    }
+
+    public function destinationWarehouseRegion(): BelongsTo
+    {
+        return $this->belongsTo(WarehouseRegion::class, 'destination_warehouse_region_id');
     }
 }
