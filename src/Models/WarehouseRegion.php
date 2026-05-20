@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Molitor\Stock\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -17,9 +19,11 @@ class WarehouseRegion extends Model
         'description',
     ];
 
-    public function __toString()
+    public function __toString(): string
     {
-        return $this->warehouse . '/' . $this->name;
+        $warehouseName = $this->warehouse?->name ?? '';
+
+        return trim($warehouseName . '/' . $this->name, '/');
     }
 
     public function warehouse(): BelongsTo

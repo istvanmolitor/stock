@@ -2,10 +2,7 @@
 
 namespace Molitor\Stock\Services;
 
-use Filament\Forms\Components\TextInput;
-use Molitor\Setting\Services\SettingForm;
-
-class StockSettingForm extends SettingForm
+class StockSettingForm
 {
     public function getSlug(): string
     {
@@ -20,14 +17,8 @@ class StockSettingForm extends SettingForm
     public function getForm(): array
     {
         return [
-            TextInput::make('default_warehouse_name')
-                ->label(__('stock::common.default_warehouse_name'))
-                ->required()
-                ->maxLength(255),
-            TextInput::make('default_warehouse_region_name')
-                ->label(__('stock::common.default_warehouse_region_name'))
-                ->required()
-                ->maxLength(255),
+            'default_warehouse_name' => __('stock::common.default_warehouse_name'),
+            'default_warehouse_region_name' => __('stock::common.default_warehouse_region_name'),
         ];
     }
 

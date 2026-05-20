@@ -2,9 +2,9 @@
 
 namespace Molitor\Stock\Providers;
 
+use Illuminate\Routing\Router;
 use Illuminate\Support\ServiceProvider;
 use Molitor\Product\Models\Product;
-use Molitor\Setting\Services\SettingHandler;
 use Molitor\Stock\Models\WarehouseRegion;
 use Molitor\Stock\Repositories\StockMovementItemRepository;
 use Molitor\Stock\Repositories\StockMovementItemRepositoryInterface;
@@ -18,15 +18,16 @@ use Molitor\Stock\Repositories\WarehouseRegionRepository;
 use Molitor\Stock\Repositories\WarehouseRegionRepositoryInterface;
 use Molitor\Stock\Repositories\WarehouseRepository;
 use Molitor\Stock\Repositories\WarehouseRepositoryInterface;
-use Molitor\Stock\Services\StockSettingForm;
 
 class StockServiceProvider extends ServiceProvider
 {
-    public function boot()
+    public function boot(): void
     {
         $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
         $this->loadTranslationsFrom(__DIR__ . '/../../resources/lang', 'stock');
-        $this->loadViewsFrom(__DIR__ . '/../../resources/views', 'stock');
+
+        $this->app->make(Router::class)
+            ->group(['prefix' => 'api'], __DIR__ . '/../routes/api.php');
 
         if (class_exists(Product::class)) {
             Product::resolveRelationUsing('warehouseRegions', function (Product $product) {
@@ -38,11 +39,9 @@ class StockServiceProvider extends ServiceProvider
                 )->withPivot(['quantity']);
             });
         }
-
-        $this->app->make(SettingHandler::class)->registerSettingForm(StockSettingForm::class);
     }
 
-    public function register()
+    public function register(): void
     {
         $this->app->bind(WarehouseRepositoryInterface::class, WarehouseRepository::class);
         $this->app->bind(WarehouseRegionRepositoryInterface::class, WarehouseRegionRepository::class);
