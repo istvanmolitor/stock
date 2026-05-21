@@ -247,11 +247,18 @@ class StockMovementApiController extends Controller
             ->values();
 
         $products = Product::query()
+            ->with('mainImage:id,product_id,image_url')
             ->select(['id', 'sku'])
             ->orderBy('sku')
             ->limit(500)
             ->get()
-            ->map(static fn (Product $p): array => ['id' => $p->id, 'sku' => $p->sku, 'label' => $p->sku])
+            ->map(static fn (Product $p): array => [
+                'id' => $p->id,
+                'sku' => $p->sku,
+                'name' => $p->name ?: $p->sku,
+                'label' => $p->name ?: $p->sku,
+                'image_url' => $p->mainImage?->image_url,
+            ])
             ->values();
 
         return [
