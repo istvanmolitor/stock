@@ -10,6 +10,6 @@ class StockMovementRepository implements StockMovementRepositoryInterface
 
     public function __construct()
     {
-        $this->stockMovement = new StockMovement();
+        $this->stockMovement = new StockMovement;
     }
 }

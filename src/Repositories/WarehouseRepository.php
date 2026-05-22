@@ -13,7 +13,7 @@ class WarehouseRepository implements WarehouseRepositoryInterface
 
     public function __construct()
     {
-        $this->warehouse = new Warehouse();
+        $this->warehouse = new Warehouse;
     }
 
     public function delete(Warehouse $warehouse): bool
@@ -41,7 +41,7 @@ class WarehouseRepository implements WarehouseRepositoryInterface
         return 'Raktár';
     }
 
-    public function getByName(string $name): Warehouse|null
+    public function getByName(string $name): ?Warehouse
     {
         return $this->warehouse->where('name', $name)->first();
     }
@@ -50,9 +50,10 @@ class WarehouseRepository implements WarehouseRepositoryInterface
     {
         $name = $this->getDefaultWarehouseName();
         $defaultWarehouse = $this->getByName($name);
-        if($defaultWarehouse) {
+        if ($defaultWarehouse) {
             return $defaultWarehouse;
         }
+
         return $this->warehouse->create([
             'name' => $name,
         ]);

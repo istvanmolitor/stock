@@ -18,4 +18,3 @@ class WarehouseRegionSimpleResource extends JsonResource
         ];
     }
 }
-

@@ -4,8 +4,8 @@ namespace Molitor\Stock\Repositories;
 
 use Molitor\Product\Models\Product;
 use Molitor\Stock\Models\Warehouse;
-use Molitor\Stock\Models\WarehouseRegionProduct;
 use Molitor\Stock\Models\WarehouseRegion;
+use Molitor\Stock\Models\WarehouseRegionProduct;
 
 class WarehouseRegionProductRepository implements WarehouseRegionProductRepositoryInterface
 {
@@ -13,10 +13,10 @@ class WarehouseRegionProductRepository implements WarehouseRegionProductReposito
 
     public function __construct()
     {
-        $this->warehouseRegionProduct = new WarehouseRegionProduct();
+        $this->warehouseRegionProduct = new WarehouseRegionProduct;
     }
 
-    public function get(WarehouseRegion $warehouseRegion, Product $product): WarehouseRegionProduct|null
+    public function get(WarehouseRegion $warehouseRegion, Product $product): ?WarehouseRegionProduct
     {
         return $this->warehouseRegionProduct->where('warehouse_region_id', $warehouseRegion->id)
             ->where('product_id', $product->id)
@@ -36,6 +36,7 @@ class WarehouseRegionProductRepository implements WarehouseRegionProductReposito
                 'min_quantity' => $minQuantity,
                 'max_quantity' => $maxQuantity,
             ]);
+
             return $existing;
         }
 

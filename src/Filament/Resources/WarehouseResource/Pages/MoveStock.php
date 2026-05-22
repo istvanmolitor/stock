@@ -13,7 +13,6 @@ use Molitor\Product\Models\Product;
 use Molitor\Stock\Filament\Resources\WarehouseResource;
 use Molitor\Stock\Models\Warehouse;
 use Molitor\Stock\Models\WarehouseRegion;
-use Molitor\Stock\Repositories\WarehouseRegionRepositoryInterface;
 use Molitor\Stock\Services\StockService;
 
 class MoveStock extends Page implements HasForms
@@ -46,7 +45,6 @@ class MoveStock extends Page implements HasForms
     {
         return __('stock::warehouse.move_stock');
     }
-
 
     public function form(Schema $schema): Schema
     {
@@ -109,14 +107,14 @@ class MoveStock extends Page implements HasForms
                     ->minValue(1)
                     ->default(1)
                     ->suffix(function (callable $get) {
-                        if (!$get('source_region_id') || !$get('product_id')) {
+                        if (! $get('source_region_id') || ! $get('product_id')) {
                             return '';
                         }
 
                         $sourceRegion = WarehouseRegion::find($get('source_region_id'));
                         $product = Product::find($get('product_id'));
 
-                        if (!$sourceRegion || !$product) {
+                        if (! $sourceRegion || ! $product) {
                             return '';
                         }
 
@@ -150,7 +148,7 @@ class MoveStock extends Page implements HasForms
                 ->title(__('stock::warehouse.notifications.insufficient_stock_title'))
                 ->body(__('stock::warehouse.notifications.insufficient_stock_body', [
                     'available' => $availableStock,
-                    'requested' => $quantity
+                    'requested' => $quantity,
                 ]))
                 ->danger()
                 ->send();
@@ -167,7 +165,7 @@ class MoveStock extends Page implements HasForms
                 'quantity' => $quantity,
                 'product' => $product->name,
                 'source' => $sourceRegion->name,
-                'destination' => $destinationRegion->name
+                'destination' => $destinationRegion->name,
             ]))
             ->success()
             ->send();
@@ -176,4 +174,3 @@ class MoveStock extends Page implements HasForms
         $this->form->fill();
     }
 }
-

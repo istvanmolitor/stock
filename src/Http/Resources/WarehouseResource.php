@@ -22,4 +22,3 @@ class WarehouseResource extends JsonResource
         ];
     }
 }
-

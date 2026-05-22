@@ -35,4 +35,3 @@ class StockMovementResource extends JsonResource
         ];
     }
 }
-

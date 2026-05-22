@@ -2,29 +2,27 @@
 
 namespace Molitor\Stock\Filament\Resources;
 
-use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
-use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Placeholder;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Schema;
-use Filament\Tables\Table;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\IconColumn;
-use Filament\Actions\ViewAction;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\HtmlString;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\HtmlString;
 use Molitor\Product\Models\Product;
+use Molitor\Stock\Enums\StockMovementType;
 use Molitor\Stock\Filament\Resources\StockMovementResource\Pages;
 use Molitor\Stock\Models\StockMovement;
-use Molitor\Stock\Enums\StockMovementType;
 
 class StockMovementResource extends Resource
 {
@@ -67,6 +65,7 @@ class StockMovementResource extends Resource
                     ->required()
                     ->disabled(function (callable $get, ?Model $record) {
                         $linked = $get('linked_stock_movement_id');
+
                         return ! empty($linked) || ! is_null($record?->linked_stock_movement_id);
                     }),
                 Select::make('warehouse_id')
@@ -87,6 +86,7 @@ class StockMovementResource extends Resource
                             return null;
                         }
                         $url = Pages\ViewStockMovement::getUrl(['record' => $linkedId]);
+
                         return new HtmlString(view('stock::components.linked-stock-movement', [
                             'url' => $url,
                             'id' => $linkedId,
@@ -94,6 +94,7 @@ class StockMovementResource extends Resource
                     })
                     ->visible(function (callable $get, ?Model $record) {
                         $linkedId = $get('linked_stock_movement_id') ?? $record?->linked_stock_movement_id;
+
                         return ! empty($linkedId);
                     }),
             ]),
@@ -107,7 +108,7 @@ class StockMovementResource extends Resource
                         Select::make('product_id')
                             ->label(__('purchase::common.product'))
                             ->searchable()
-                            ->getOptionLabelFromRecordUsing(fn($record) => (string) $record)
+                            ->getOptionLabelFromRecordUsing(fn ($record) => (string) $record)
                             ->relationship('product', 'id')
                             ->required()
                             ->reactive()
@@ -130,6 +131,7 @@ class StockMovementResource extends Resource
                                 if (! $product || ! $product->productUnit) {
                                     return null;
                                 }
+
                                 return (string) $product->productUnit;
                             }),
                         Select::make('warehouse_region_id')
@@ -138,8 +140,7 @@ class StockMovementResource extends Resource
                                 $warehouseId = $get('../../warehouse_id');
                                 if ($warehouseId) {
                                     $query->where('warehouse_id', $warehouseId);
-                                }
-                                else {
+                                } else {
                                     $query->whereRaw('1 = 0');
                                 }
                             })
@@ -202,9 +203,9 @@ class StockMovementResource extends Resource
             ->actions([
                 ViewAction::make(),
                 EditAction::make()
-                    ->hidden(fn (StockMovement $record) => !is_null($record->closed_at)),
+                    ->hidden(fn (StockMovement $record) => ! is_null($record->closed_at)),
                 DeleteAction::make()
-                    ->hidden(fn (StockMovement $record) => !is_null($record->closed_at)),
+                    ->hidden(fn (StockMovement $record) => ! is_null($record->closed_at)),
             ])
             ->bulkActions([
             ]);

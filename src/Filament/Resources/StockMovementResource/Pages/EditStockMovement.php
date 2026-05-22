@@ -1,12 +1,12 @@
 <?php
+
 namespace Molitor\Stock\Filament\Resources\StockMovementResource\Pages;
 
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 use Molitor\Stock\Filament\Resources\StockMovementResource;
-use Filament\Support\Exceptions\Halt;
-use Molitor\Stock\Models\StockMovement;
 use Molitor\Stock\Filament\Resources\StockMovementResource\Pages\Concerns\HandlesStockMovementExecution;
+use Molitor\Stock\Models\StockMovement;
 
 class EditStockMovement extends EditRecord
 {
@@ -27,7 +27,7 @@ class EditStockMovement extends EditRecord
 
     protected function saveAndClose(): void
     {
-       $this->save();
+        $this->save();
 
         /** @var StockMovement $stockMovement */
         $stockMovement = $this->record;

@@ -1,11 +1,12 @@
 <?php
+
 namespace Molitor\Stock\Filament\Resources\StockMovementResource\Pages;
 
 use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
 use Molitor\Stock\Filament\Resources\StockMovementResource;
-use Molitor\Stock\Models\StockMovement;
 use Molitor\Stock\Filament\Resources\StockMovementResource\Pages\Concerns\HandlesStockMovementExecution;
+use Molitor\Stock\Models\StockMovement;
 
 class CreateStockMovement extends CreateRecord
 {

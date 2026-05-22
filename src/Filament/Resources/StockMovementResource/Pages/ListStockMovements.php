@@ -1,4 +1,5 @@
 <?php
+
 namespace Molitor\Stock\Filament\Resources\StockMovementResource\Pages;
 
 use Filament\Actions\CreateAction;

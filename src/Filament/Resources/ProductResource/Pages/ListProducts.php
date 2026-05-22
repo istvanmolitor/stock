@@ -11,7 +11,6 @@ use Illuminate\Support\Facades\DB;
 use Molitor\Stock\Filament\Resources\ProductResource;
 use Molitor\Stock\Models\Warehouse;
 use Molitor\Stock\Models\WarehouseRegion;
-use Molitor\Stock\Repositories\StockRepositoryInterface;
 use Molitor\Stock\Services\StockService;
 
 class ListProducts extends ListRecords
@@ -21,6 +20,7 @@ class ListProducts extends ListRecords
     protected Warehouse|WarehouseRegion|null $filter = null;
 
     public ?int $warehouseRegionId = null;
+
     public ?int $warehouseId = null;
 
     public function mount(): void
@@ -35,9 +35,9 @@ class ListProducts extends ListRecords
 
     protected function loadFilter(): void
     {
-        if($this->warehouseRegionId) {
+        if ($this->warehouseRegionId) {
             $this->filter = WarehouseRegion::findOrFail($this->warehouseRegionId);
-        } elseif($this->warehouseId) {
+        } elseif ($this->warehouseId) {
             $this->filter = Warehouse::findOrFail($this->warehouseId);
         }
     }
@@ -49,11 +49,11 @@ class ListProducts extends ListRecords
 
     public function getTitle(): string
     {
-        if($this->filter instanceof Warehouse) {
-            return __('stock::common.warehouse') . ': ' . $this->filter;
+        if ($this->filter instanceof Warehouse) {
+            return __('stock::common.warehouse').': '.$this->filter;
         }
-        if($this->filter instanceof WarehouseRegion) {
-            return __('stock::common.warehouse_region') . ': ' . $this->filter;
+        if ($this->filter instanceof WarehouseRegion) {
+            return __('stock::common.warehouse_region').': '.$this->filter;
         }
 
         return __('stock::stock.title');
@@ -86,8 +86,8 @@ class ListProducts extends ListRecords
                     ->sortable(),
                 TextColumn::make('id')
                     ->label(__('stock::common.quantity'))
-                    ->formatStateUsing(function($record) use ($stockService) {
-                        return $stockService->getStock($this->filter, $record) . ' ' . $record->productUnit;
+                    ->formatStateUsing(function ($record) use ($stockService) {
+                        return $stockService->getStock($this->filter, $record).' '.$record->productUnit;
                     }),
             ]);
     }
@@ -98,20 +98,20 @@ class ListProducts extends ListRecords
 
         $query = parent::getTableQuery();
 
-        if($this->filter) {
-            if($this->filter instanceof Warehouse) {
+        if ($this->filter) {
+            if ($this->filter instanceof Warehouse) {
                 $subQuery = DB::table('stocks as s')
                     ->join('warehouse_regions as wr', 'wr.id', '=', 's.warehouse_region_id')
                     ->where('wr.warehouse_id', $this->filter->id)
                     ->select('s.product_id');
-            } elseif($this->filter instanceof WarehouseRegion) {
+            } elseif ($this->filter instanceof WarehouseRegion) {
                 $subQuery = DB::table('stocks as s')->where('s.warehouse_region_id', $this->filter->id)
                     ->select('s.product_id');
             }
+
             return $query->joinSub($subQuery, 'sub', 'products.id', '=', 'sub.product_id');
         }
 
         return $query;
     }
 }
-

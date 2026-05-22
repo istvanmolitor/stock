@@ -67,6 +67,7 @@ class WarehouseRegionProductRelationManager extends RelationManager
                     ])
                     ->mutateFormDataUsing(function (array $data): array {
                         $data['warehouse_region_id'] = $this->getOwnerRecord()->id;
+
                         return $data;
                     }),
             ])

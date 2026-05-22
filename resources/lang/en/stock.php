@@ -8,4 +8,3 @@ return [
     'product_list' => 'Products with stock',
     'total_quantity' => 'Total quantity',
 ];
-

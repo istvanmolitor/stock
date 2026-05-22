@@ -130,4 +130,3 @@ class WarehouseRegionApiController extends Controller
         $warehouseRegion->forceFill(['is_primary' => true])->save();
     }
 }
-

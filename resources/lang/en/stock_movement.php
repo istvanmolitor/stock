@@ -7,4 +7,3 @@ return [
     'list' => 'Stock Movement List',
     'view_title' => 'View Stock Movement',
 ];
-

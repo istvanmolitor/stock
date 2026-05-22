@@ -4,6 +4,7 @@ namespace Molitor\Stock\Filament\Resources\WarehouseRegionResource\Pages;
 
 use Filament\Resources\Pages\CreateRecord;
 use Molitor\Stock\Filament\Resources\WarehouseRegionResource;
+use Molitor\Stock\Models\WarehouseRegion;
 use Molitor\Stock\Repositories\WarehouseRegionRepositoryInterface;
 
 class CreateWarehouseRegion extends CreateRecord
@@ -22,7 +23,7 @@ class CreateWarehouseRegion extends CreateRecord
 
     protected function afterSave(): void
     {
-        /** @var \Molitor\Stock\Models\WarehouseRegion $record */
+        /** @var WarehouseRegion $record */
         $record = $this->record;
 
         if ($record->is_primary) {

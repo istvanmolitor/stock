@@ -2,7 +2,4 @@
 
 namespace Molitor\Stock\Repositories;
 
-interface StockMovementItemRepositoryInterface
-{
-
-}
+interface StockMovementItemRepositoryInterface {}

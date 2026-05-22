@@ -10,6 +10,6 @@ return [
                 'name' => 'Raktár',
                 'is_primary' => true,
             ],
-        ]
+        ],
     ],
 ];

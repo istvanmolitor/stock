@@ -17,7 +17,7 @@ interface WarehouseRepositoryInterface
 
     public function getOptions(): array;
 
-    public function getByName(string $name): Warehouse|null;
+    public function getByName(string $name): ?Warehouse;
 
     public function getDefault(): Warehouse;
 }

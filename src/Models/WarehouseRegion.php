@@ -23,7 +23,7 @@ class WarehouseRegion extends Model
     {
         $warehouseName = $this->warehouse?->name ?? '';
 
-        return trim($warehouseName . '/' . $this->name, '/');
+        return trim($warehouseName.'/'.$this->name, '/');
     }
 
     public function warehouse(): BelongsTo

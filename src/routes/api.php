@@ -16,4 +16,3 @@ Route::prefix('admin/stock')
         Route::post('movements/{stockMovement}/execute', [StockMovementApiController::class, 'execute'])->name('stock.movements.execute');
         Route::resource('movements', StockMovementApiController::class)->parameters(['movements' => 'stockMovement']);
     });
-

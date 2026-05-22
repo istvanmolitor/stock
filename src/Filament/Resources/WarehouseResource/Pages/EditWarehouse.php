@@ -4,6 +4,7 @@ namespace Molitor\Stock\Filament\Resources\WarehouseResource\Pages;
 
 use Filament\Resources\Pages\EditRecord;
 use Molitor\Stock\Filament\Resources\WarehouseResource;
+use Molitor\Stock\Models\Warehouse;
 use Molitor\Stock\Repositories\WarehouseRepositoryInterface;
 
 class EditWarehouse extends EditRecord
@@ -22,7 +23,7 @@ class EditWarehouse extends EditRecord
 
     protected function afterSave(): void
     {
-        /** @var \Molitor\Stock\Models\Warehouse $record */
+        /** @var Warehouse $record */
         $record = $this->record;
 
         if ($record->is_primary) {

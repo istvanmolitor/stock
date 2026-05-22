@@ -15,7 +15,7 @@ class WarehouseRegionRepository implements WarehouseRegionRepositoryInterface
 
     public function __construct()
     {
-        $this->warehouseRegion = new WarehouseRegion();
+        $this->warehouseRegion = new WarehouseRegion;
     }
 
     public function delete(WarehouseRegion $warehouseRegion)
@@ -37,7 +37,7 @@ class WarehouseRegionRepository implements WarehouseRegionRepositoryInterface
         return 'Régió';
     }
 
-    public function getByName(Warehouse $warehouse, string $name): WarehouseRegion|null
+    public function getByName(Warehouse $warehouse, string $name): ?WarehouseRegion
     {
         return $this->warehouseRegion->where('warehouse_id', $warehouse->id)
             ->where('name', $name)
@@ -48,9 +48,10 @@ class WarehouseRegionRepository implements WarehouseRegionRepositoryInterface
     {
         $name = $this->getDefaultWarehouseRegionName();
         $defaultRegion = $this->getByName($warehouse, $name);
-        if($defaultRegion) {
+        if ($defaultRegion) {
             return $defaultRegion;
         }
+
         return $this->warehouseRegion->create([
             'warehouse_id' => $warehouse->id,
             'name' => $name,
@@ -63,9 +64,10 @@ class WarehouseRegionRepository implements WarehouseRegionRepositoryInterface
             ->join('stocks', 'stocks.warehouse_region_id', '=', 'warehouse_regions.id')
             ->where('stocks.product_id', $product->id)
             ->orderByDesc('stocks.quantity')->select('warehouse_regions.*')->first();
-        if($region) {
+        if ($region) {
             return $region;
         }
+
         return $this->getDefault($warehouse);
     }
 

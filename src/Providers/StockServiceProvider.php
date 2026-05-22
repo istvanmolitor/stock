@@ -23,11 +23,11 @@ class StockServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
-        $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
-        $this->loadTranslationsFrom(__DIR__ . '/../../resources/lang', 'stock');
+        $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
+        $this->loadTranslationsFrom(__DIR__.'/../../resources/lang', 'stock');
 
         $this->app->make(Router::class)
-            ->group(['prefix' => 'api'], __DIR__ . '/../routes/api.php');
+            ->group(['prefix' => 'api'], __DIR__.'/../routes/api.php');
 
         if (class_exists(Product::class)) {
             Product::resolveRelationUsing('warehouseRegions', function (Product $product) {

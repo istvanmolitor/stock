@@ -6,7 +6,6 @@ use Illuminate\Database\Seeder;
 use Molitor\Stock\Models\Warehouse;
 use Molitor\Stock\Models\WarehouseRegion;
 use Molitor\User\Exceptions\PermissionException;
-use Molitor\User\Repositories\AclRepositoryInterface;
 use Molitor\User\Services\AclManagementService;
 
 class StockSeeder extends Seeder
@@ -27,17 +26,17 @@ class StockSeeder extends Seeder
             $this->command->error($e->getMessage());
         }
 
-        $data = include __DIR__ . '/data/regions.php';
+        $data = include __DIR__.'/data/regions.php';
 
-        foreach($data as $warehouseData) {
-            $warehouse = new Warehouse();
+        foreach ($data as $warehouseData) {
+            $warehouse = new Warehouse;
             $warehouse->is_primary = $warehouseData['is_primary'];
             $warehouse->name = $warehouseData['name'];
             $warehouse->description = $warehouseData['description'];
             $warehouse->save();
 
-            foreach($warehouseData['regions'] as $regionData) {
-                $region = new WarehouseRegion();
+            foreach ($warehouseData['regions'] as $regionData) {
+                $region = new WarehouseRegion;
                 $region->warehouse_id = $warehouse->id;
                 $region->is_primary = $regionData['is_primary'];
                 $region->name = $regionData['name'];

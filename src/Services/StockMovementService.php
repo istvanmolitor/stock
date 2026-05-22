@@ -6,15 +6,12 @@ use Molitor\Stock\Enums\StockMovementType;
 use Molitor\Stock\Models\StockMovement;
 use Molitor\Stock\Models\StockMovementItem;
 use Molitor\Stock\Repositories\StockRepositoryInterface;
-use Molitor\Unas\Services\Endpoints\Auth;
 
 class StockMovementService
 {
     public function __construct(
         protected StockRepositoryInterface $stockRepository,
-    )
-    {
-    }
+    ) {}
 
     public function close(StockMovement $stockMovement): void
     {
@@ -27,12 +24,11 @@ class StockMovementService
     {
         if ($stockMovement->type === StockMovementType::In) {
             $this->increase($stockMovement);
+
             return [];
-        }
-        elseif ($stockMovement->type === StockMovementType::Out) {
+        } elseif ($stockMovement->type === StockMovementType::Out) {
             return $this->decrease($stockMovement);
-        }
-        elseif ($stockMovement->type === StockMovementType::Transfer) {
+        } elseif ($stockMovement->type === StockMovementType::Transfer) {
             return $this->transfer($stockMovement);
         }
     }
@@ -63,7 +59,7 @@ class StockMovementService
             $currentQuantity = $this->stockRepository->getQuantity($warehouseRegion, $product);
             $newQuantity = $currentQuantity - $stockMovementItem->quantity;
 
-            if($newQuantity < 0) {
+            if ($newQuantity < 0) {
                 $errors[] = [
                     'product' => $product,
                     'region' => $warehouseRegion,
@@ -79,7 +75,7 @@ class StockMovementService
     private function decrease(StockMovement $stockMovement): array
     {
         $errors = $this->validateDecrease($stockMovement);
-        if(count($errors)) {
+        if (count($errors)) {
             return $errors;
         }
 
@@ -96,13 +92,14 @@ class StockMovementService
             );
         }
         $this->close($stockMovement);
+
         return [];
     }
 
     private function transfer(StockMovement $stockMovement): array
     {
         $errors = $this->decrease($stockMovement);
-        if(count($errors)) {
+        if (count($errors)) {
             return $errors;
         }
 
@@ -124,6 +121,7 @@ class StockMovementService
             ]);
             $newStockMovementItem->save();
         }
+
         return [];
     }
 }

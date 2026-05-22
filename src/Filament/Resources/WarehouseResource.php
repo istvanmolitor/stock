@@ -3,22 +3,18 @@
 namespace Molitor\Stock\Filament\Resources;
 
 use Filament\Actions\Action;
-use Filament\Forms\Components\Toggle;
-use Filament\Resources\Resource;
-use Filament\Forms;
-use Filament\Tables;
-use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Table;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
+use Filament\Forms;
+use Filament\Forms\Components\Toggle;
+use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 use Illuminate\Support\Facades\Gate;
 use Molitor\Stock\Filament\Resources\WarehouseResource\Pages;
 use Molitor\Stock\Models\Warehouse;
-use Molitor\Stock\Models\WarehouseRegion;
 
 class WarehouseResource extends Resource
 {
@@ -67,14 +63,12 @@ class WarehouseResource extends Resource
                 Action::make('id')
                     ->label(__('stock::common.stock'))
                     ->icon('heroicon-o-cube')
-                    ->url(fn (Warehouse $record): string =>
-                        ProductResource::getUrl('index', ['warehouse_id' => $record->id])
+                    ->url(fn (Warehouse $record): string => ProductResource::getUrl('index', ['warehouse_id' => $record->id])
                     ),
                 Action::make('move_stock')
                     ->label(__('stock::warehouse.move_stock'))
                     ->icon('heroicon-o-arrow-path')
-                    ->url(fn (Warehouse $record): string =>
-                        self::getUrl('move-stock', ['record' => $record])
+                    ->url(fn (Warehouse $record): string => self::getUrl('move-stock', ['record' => $record])
                     ),
                 EditAction::make(),
                 DeleteAction::make()

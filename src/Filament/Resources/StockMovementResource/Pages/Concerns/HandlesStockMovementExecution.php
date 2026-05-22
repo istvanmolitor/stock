@@ -1,4 +1,5 @@
 <?php
+
 namespace Molitor\Stock\Filament\Resources\StockMovementResource\Pages\Concerns;
 
 use Filament\Notifications\Notification;
@@ -30,11 +31,11 @@ trait HandlesStockMovementExecution
 
                 Notification::make()
                     ->title('Nincs elegendő készlet')
-                    ->body("Az alábbi tételeknél nincs elegendő készlet, a lezárás nem történt meg:\n" . implode("\n", $lines))
+                    ->body("Az alábbi tételeknél nincs elegendő készlet, a lezárás nem történt meg:\n".implode("\n", $lines))
                     ->danger()
                     ->send();
 
-                throw new Halt();
+                throw new Halt;
             }
         });
     }
@@ -45,6 +46,7 @@ trait HandlesStockMovementExecution
         $available = $error['currentQuantity'] ?? null;
         $productLabel = $product?->sku ?? $product?->name ?? 'Termék';
         $regionLabel = $region?->name ?? 'Régió';
+
         return "- {$productLabel} ({$regionLabel}): Elérhető mennyiség: {$available}";
     }
 }

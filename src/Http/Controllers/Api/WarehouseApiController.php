@@ -121,4 +121,3 @@ class WarehouseApiController extends Controller
         $warehouse->forceFill(['is_primary' => true])->save();
     }
 }
-

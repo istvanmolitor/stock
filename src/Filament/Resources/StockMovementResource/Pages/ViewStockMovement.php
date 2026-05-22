@@ -3,9 +3,9 @@
 namespace Molitor\Stock\Filament\Resources\StockMovementResource\Pages;
 
 use Filament\Actions\EditAction;
-use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\RepeatableEntry;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Components\Fieldset;
 use Filament\Schemas\Schema;
@@ -23,7 +23,7 @@ class ViewStockMovement extends ViewRecord
 
     public function getTitle(): string
     {
-        return __('stock::stock_movement.view_title') . ' #' . ($this->record?->id ?? '');
+        return __('stock::stock_movement.view_title').' #'.($this->record?->id ?? '');
     }
 
     protected function getHeaderActions(): array
@@ -52,7 +52,7 @@ class ViewStockMovement extends ViewRecord
                         IconEntry::make('is_closed')
                             ->label(__('stock::common.is_closed'))
                             ->boolean()
-                            ->state(fn ($record) => !is_null($record->closed_at)),
+                            ->state(fn ($record) => ! is_null($record->closed_at)),
                     ])
                     ->columns(2),
                 Fieldset::make(__('stock::common.linked_stock_movement'))
@@ -64,6 +64,7 @@ class ViewStockMovement extends ViewRecord
                                     return null;
                                 }
                                 $url = StockMovementResource::getUrl('view', ['record' => $record->linked_stock_movement_id]);
+
                                 return new HtmlString(view('stock::components.linked-stock-movement', [
                                     'url' => $url,
                                     'id' => $record->linked_stock_movement_id,
@@ -71,7 +72,7 @@ class ViewStockMovement extends ViewRecord
                             })
                             ->columnSpanFull(),
                     ])
-                    ->visible(fn ($record) => !empty($record->linked_stock_movement_id)),
+                    ->visible(fn ($record) => ! empty($record->linked_stock_movement_id)),
                 Fieldset::make(__('stock::common.description'))
                     ->schema([
                         TextEntry::make('description')
@@ -79,7 +80,7 @@ class ViewStockMovement extends ViewRecord
                             ->placeholder(__('stock::common.no_description'))
                             ->columnSpanFull(),
                     ])
-                    ->visible(fn ($record) => !empty($record->description)),
+                    ->visible(fn ($record) => ! empty($record->description)),
                 Fieldset::make(__('stock::common.items'))
                     ->schema([
                         RepeatableEntry::make('stockMovementItems')
@@ -91,7 +92,7 @@ class ViewStockMovement extends ViewRecord
                                     ->columnSpan(2),
                                 TextEntry::make('quantity')
                                     ->label(__('stock::common.quantity'))
-                                    ->state(fn ($record) => $record->quantity . ' ' . ($record->product?->productUnit ? (string) $record->product->productUnit : ''))
+                                    ->state(fn ($record) => $record->quantity.' '.($record->product?->productUnit ? (string) $record->product->productUnit : ''))
                                     ->columnSpan(1),
                                 TextEntry::make('warehouseRegion.name')
                                     ->label(__('stock::common.warehouse_region'))

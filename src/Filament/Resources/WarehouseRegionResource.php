@@ -3,23 +3,18 @@
 namespace Molitor\Stock\Filament\Resources;
 
 use Filament\Actions\Action;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
+use Filament\Forms;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
-use Filament\Forms;
-use Filament\Tables;
-use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Table;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\EditAction;
-use Filament\Actions\ViewAction;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
 use Filament\Schemas\Schema;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 use Illuminate\Support\Facades\Gate;
 use Molitor\Stock\Filament\Resources\WarehouseRegionResource\Pages;
-use Molitor\Stock\Filament\Resources\WarehouseRegionResource\RelationManagers\StocksRelationManager;
 use Molitor\Stock\Filament\Resources\WarehouseRegionResource\RelationManagers\WarehouseRegionProductRelationManager;
 use Molitor\Stock\Models\WarehouseRegion;
 
@@ -77,8 +72,7 @@ class WarehouseRegionResource extends Resource
                 Action::make('stock')
                     ->label(__('stock::warehouse_region.stocks.title'))
                     ->icon('heroicon-o-cube')
-                    ->url(fn (WarehouseRegion $record): string =>
-                        ProductResource::getUrl('index', ['warehouse_region_id' => $record->id])
+                    ->url(fn (WarehouseRegion $record): string => ProductResource::getUrl('index', ['warehouse_region_id' => $record->id])
                     ),
                 EditAction::make(),
                 DeleteAction::make()

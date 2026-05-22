@@ -18,44 +18,40 @@ class StockService
         protected WarehouseRegionRepositoryInterface $warehouseRegionRepository,
         protected WarehouseRegionProductRepositoryInterface $warehouseRegionProductRepository
 
-    )
-    {
-    }
+    ) {}
 
     protected function getMinStock(WarehouseRegion|Warehouse|null $location, Product $product): int
     {
-        if($location instanceof Warehouse) {
+        if ($location instanceof Warehouse) {
             return $this->warehouseRegionProductRepository->getMinQuantityByWarehouse($location, $product);
-        }
-        elseif ($location instanceof WarehouseRegion) {
+        } elseif ($location instanceof WarehouseRegion) {
             return $this->warehouseRegionProductRepository->getMinQuantity($location, $product);
         }
+
         return $this->warehouseRegionProductRepository->getAllMinQuantity($product);
     }
 
     public function getStock(WarehouseRegion|Warehouse|null $location, Product $product): int
     {
-        if($location instanceof Warehouse) {
+        if ($location instanceof Warehouse) {
             return $this->stockRepository->getQuantityByWarehouse($location, $product);
-        }
-        elseif ($location instanceof WarehouseRegion) {
+        } elseif ($location instanceof WarehouseRegion) {
             return $this->stockRepository->getQuantity($location, $product);
         }
+
         return $this->stockRepository->getAllQuantity($product);
     }
 
     public function setStock(WarehouseRegion|Warehouse|null $location, Product $product, int $quantity): void
     {
-        if($location === null) {
+        if ($location === null) {
             $warehouse = $this->warehouseRepository->getDefault();
             $region = $this->warehouseRegionRepository->getDefault($warehouse);
             $this->stockRepository->setQuantity($region, $product, $quantity);
-        }
-        elseif($location instanceof Warehouse) {
+        } elseif ($location instanceof Warehouse) {
             $region = $this->warehouseRegionRepository->getDefault($location);
             $this->stockRepository->setQuantity($region, $product, $quantity);
-        }
-        elseif ($location instanceof WarehouseRegion) {
+        } elseif ($location instanceof WarehouseRegion) {
             $this->stockRepository->setQuantity($location, $product, $quantity);
         }
     }
@@ -63,7 +59,7 @@ class StockService
     public function moveStock(WarehouseRegion $source, WarehouseRegion $destionation, Product $product, int $quantity): void
     {
         $currentQuantity = $this->stockRepository->getQuantity($source, $product);
-        if($currentQuantity >= $quantity) {
+        if ($currentQuantity >= $quantity) {
             $this->stockRepository->setQuantity($source, $product, $currentQuantity - $quantity);
             $destinationQuantity = $this->stockRepository->getQuantity($destionation, $product);
             $this->stockRepository->setQuantity($destionation, $product, $destinationQuantity + $quantity);
@@ -73,12 +69,14 @@ class StockService
     public function isFew(WarehouseRegion|Warehouse|null $location, Product $product): bool
     {
         $stock = $this->getStock($location, $product);
+
         return $stock < $this->getMinStock($location, $product);
     }
 
     public function isMany(WarehouseRegion|Warehouse|null $location, Product $product): bool
     {
         $stock = $this->getStock($location, $product);
+
         return $stock > $this->getMinStock($location, $product);
     }
 }
