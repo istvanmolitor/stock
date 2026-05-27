@@ -22,6 +22,7 @@ Route::prefix('admin/stock')
         Route::post('inventories', [InventoryApiController::class, 'store'])->name('inventories.store');
         Route::get('inventories/{inventory}/edit', [InventoryApiController::class, 'edit'])->name('inventories.edit');
         Route::put('inventories/{inventory}', [InventoryApiController::class, 'update'])->name('inventories.update');
+        Route::delete('inventories/{inventory}', [InventoryApiController::class, 'destroy'])->name('inventories.destroy');
         Route::post('inventories/{inventory}/close', [InventoryApiController::class, 'close'])->name('inventories.close');
         Route::post('movements/{stockMovement}/execute', [StockMovementApiController::class, 'execute'])->name('stock.movements.execute');
         Route::resource('movements', StockMovementApiController::class)->parameters(['movements' => 'stockMovement']);

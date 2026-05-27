@@ -210,6 +210,19 @@ class InventoryApiController extends Controller
             'message' => 'A leltár sikeresen lezárva, a készlet frissítve.',
         ]);
     }
+
+    public function destroy(Inventory $inventory): JsonResponse
+    {
+        if ($inventory->stock_updated_at !== null) {
+            return response()->json(['message' => 'A lezárt leltár nem törölhető.'], 422);
+        }
+
+        $inventory->delete();
+
+        return response()->json([
+            'message' => 'A leltár sikeresen törölve lett.',
+        ]);
+    }
 }
 
 
