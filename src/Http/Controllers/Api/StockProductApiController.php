@@ -9,7 +9,9 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Schema;
 use Molitor\Product\Models\Product;
+use Molitor\Product\Models\ProductImage;
 use Molitor\Stock\Models\Stock;
 use Molitor\Stock\Models\Warehouse;
 use Molitor\Stock\Models\WarehouseRegion;
@@ -27,12 +29,25 @@ class StockProductApiController extends Controller
             $sort = 'sku';
         }
 
-        $products = Product::query()
-            ->select(['id', 'sku'])
+        $canLoadProductUnits = $this->canLoadProductUnits();
+        $canLoadProductImages = $this->canLoadProductImages();
+
+        $productQuery = Product::query()
+            ->select(['id', 'sku', 'product_unit_id'])
             ->when($search !== '', function (Builder $query) use ($search): void {
                 $query->where('sku', 'like', '%'.$search.'%');
             })
-            ->orderBy($sort, $direction)
+            ->orderBy($sort, $direction);
+
+        if ($canLoadProductUnits) {
+            $productQuery->with('productUnit');
+        }
+
+        if ($canLoadProductImages) {
+            $productQuery->with('mainImage');
+        }
+
+        $products = $productQuery
             ->paginate(10)
             ->withQueryString();
 
@@ -45,8 +60,8 @@ class StockProductApiController extends Controller
         $quantitiesByProduct = $this->getQuantitiesByProductIds($productIds);
 
         $data = collect($products->items())
-            ->map(function (Product $product) use ($warehouses, $quantitiesByProduct): array {
-                return $this->transformProductSummary($product, $warehouses, $quantitiesByProduct);
+            ->map(function (Product $product) use ($warehouses, $quantitiesByProduct, $canLoadProductUnits, $canLoadProductImages): array {
+                return $this->transformProductSummary($product, $warehouses, $quantitiesByProduct, $canLoadProductUnits, $canLoadProductImages);
             })
             ->values();
 
@@ -68,11 +83,22 @@ class StockProductApiController extends Controller
 
     public function show(Product $product): JsonResponse
     {
+        $canLoadProductUnits = $this->canLoadProductUnits();
+        $canLoadProductImages = $this->canLoadProductImages();
+
+        if ($canLoadProductUnits) {
+            $product->loadMissing('productUnit');
+        }
+
+        if ($canLoadProductImages) {
+            $product->loadMissing('mainImage');
+        }
+
         $warehouses = $this->getWarehouses();
         $quantitiesByProduct = $this->getQuantitiesByProductIds([(int) $product->id]);
 
         return response()->json([
-            'data' => $this->buildProductDetail($product, $warehouses, $quantitiesByProduct),
+            'data' => $this->buildProductDetail($product, $warehouses, $quantitiesByProduct, $canLoadProductUnits, $canLoadProductImages),
         ]);
     }
 
@@ -117,13 +143,21 @@ class StockProductApiController extends Controller
      * @param  array<int, array<int, float>>  $quantitiesByProduct
      * @return array<string, mixed>
      */
-    protected function transformProductSummary(Product $product, Collection $warehouses, array $quantitiesByProduct): array
+    protected function transformProductSummary(
+        Product $product,
+        Collection $warehouses,
+        array $quantitiesByProduct,
+        bool $canLoadProductUnits,
+        bool $canLoadProductImages
+    ): array
     {
         $warehouseData = $this->buildWarehouseData($product, $warehouses, $quantitiesByProduct);
 
         return [
             'id' => $product->id,
             'sku' => $product->sku,
+            'main_image_url' => $this->resolveMainImageUrl($product, $canLoadProductImages),
+            'quantity_unit' => $this->resolveProductUnitLabel($product, $canLoadProductUnits),
             'total_quantity' => collect($warehouseData)->sum('total_quantity'),
             'region_quantities' => collect($warehouseData)
                 ->flatMap(fn (array $warehouse): array => collect($warehouse['regions'])->all())
@@ -135,7 +169,13 @@ class StockProductApiController extends Controller
      * @param  array<int, array<int, float>>  $quantitiesByProduct
      * @return array<string, mixed>
      */
-    protected function buildProductDetail(Product $product, Collection $warehouses, array $quantitiesByProduct): array
+    protected function buildProductDetail(
+        Product $product,
+        Collection $warehouses,
+        array $quantitiesByProduct,
+        bool $canLoadProductUnits,
+        bool $canLoadProductImages
+    ): array
     {
         $warehouseData = $this->buildWarehouseData($product, $warehouses, $quantitiesByProduct);
         $regionData = collect($warehouseData)
@@ -145,12 +185,59 @@ class StockProductApiController extends Controller
         return [
             'id' => $product->id,
             'sku' => $product->sku,
+            'main_image_url' => $this->resolveMainImageUrl($product, $canLoadProductImages),
+            'quantity_unit' => $this->resolveProductUnitLabel($product, $canLoadProductUnits),
             'total_quantity' => collect($warehouseData)->sum('total_quantity'),
             'warehouse_count' => count($warehouseData),
             'region_count' => $regionData->count(),
             'warehouses' => $warehouseData,
             'regions' => $regionData,
         ];
+    }
+
+    protected function canLoadProductImages(): bool
+    {
+        return Schema::hasTable('product_images');
+    }
+
+    protected function canLoadProductUnits(): bool
+    {
+        return Schema::hasTable('product_units') && Schema::hasTable('product_unit_translations');
+    }
+
+    protected function resolveProductUnitLabel(Product $product, bool $canLoadProductUnits): ?string
+    {
+        if (! $canLoadProductUnits || ! $product->relationLoaded('productUnit')) {
+            return null;
+        }
+
+        $productUnit = $product->productUnit;
+        if ($productUnit === null) {
+            return null;
+        }
+
+        $name = trim((string) $productUnit->name);
+        if ($name !== '') {
+            return $name;
+        }
+
+        $code = trim((string) $productUnit->code);
+
+        return $code !== '' ? $code : null;
+    }
+
+    protected function resolveMainImageUrl(Product $product, bool $canLoadProductImages): ?string
+    {
+        if (! $canLoadProductImages || ! $product->relationLoaded('mainImage')) {
+            return null;
+        }
+
+        $mainImage = $product->mainImage;
+        if (! $mainImage instanceof ProductImage) {
+            return null;
+        }
+
+        return $mainImage->getSrc();
     }
 
     /**
