@@ -14,7 +14,7 @@ class InventoryItemResource extends JsonResource
         return [
             'id' => $this->id,
             'product_id' => $this->product_id,
-            'old_quantity' => (float) $this->old_quantity,
+            'old_quantity' => $this->old_quantity !== null ? (float) $this->old_quantity : null,
             'new_quantity' => (float) $this->new_quantity,
             'product' => $this->whenLoaded('product', fn (): array => [
                 'id' => $this->product->id,

@@ -64,11 +64,28 @@ class InventoryApiController extends Controller
         $validated = $request->validated();
 
         $inventory = DB::transaction(function () use ($validated): Inventory {
+            $warehouseRegionId = (int) $validated['warehouse_region_id'];
+
             $inventory = Inventory::query()->create([
-                'warehouse_region_id' => (int) $validated['warehouse_region_id'],
+                'warehouse_region_id' => $warehouseRegionId,
                 'description' => $validated['description'] ?? null,
             ]);
 
+            $warehouseRegion = WarehouseRegion::query()->findOrFail($warehouseRegionId);
+            $regionStocks = $this->stockRepository->getByWarehouseRegion($warehouseRegion);
+
+            foreach ($regionStocks as $stock) {
+                if ((float) $stock->quantity <= 0) {
+                    continue;
+                }
+
+                InventoryItem::query()->create([
+                    'inventory_id' => $inventory->id,
+                    'product_id' => $stock->product_id,
+                    'old_quantity' => null,
+                    'new_quantity' => (float) $stock->quantity,
+                ]);
+            }
 
             return $inventory;
         });
@@ -127,6 +144,8 @@ class InventoryApiController extends Controller
                 ->get()
                 ->keyBy('id');
 
+            $existingItemsByProductId = $existingItemsById->keyBy('product_id');
+
             $submittedExistingItemIds = [];
 
             foreach ($validated['items'] as $item) {
@@ -148,10 +167,23 @@ class InventoryApiController extends Controller
                     continue;
                 }
 
+                $productId = (int) $item['product_id'];
+                $existingByProduct = $existingItemsByProductId->get($productId);
+
+                if ($existingByProduct !== null) {
+                    $existingByProduct->update([
+                        'new_quantity' => (int) $item['new_quantity'],
+                    ]);
+
+                    $submittedExistingItemIds[] = $existingByProduct->id;
+
+                    continue;
+                }
+
                 InventoryItem::query()->create([
                     'inventory_id' => $inventory->id,
-                    'product_id' => (int) $item['product_id'],
-                    'old_quantity' => 0,
+                    'product_id' => $productId,
+                    'old_quantity' => null,
                     'new_quantity' => (int) $item['new_quantity'],
                 ]);
             }

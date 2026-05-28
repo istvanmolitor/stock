@@ -14,7 +14,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('inventory_id')->constrained('inventories')->cascadeOnDelete();
             $table->foreignId('product_id')->constrained('products')->cascadeOnDelete();
-            $table->decimal('old_quantity', 16, 4)->default(0);
+            $table->decimal('old_quantity', 16, 4)->nullable()->default(null);
             $table->decimal('new_quantity', 16, 4)->default(0);
             $table->timestamps();
 
