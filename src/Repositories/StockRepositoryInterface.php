@@ -2,6 +2,7 @@
 
 namespace Molitor\Stock\Repositories;
 
+use Illuminate\Support\Collection;
 use Molitor\Product\Models\Product;
 use Molitor\Stock\Models\Stock;
 use Molitor\Stock\Models\Warehouse;
@@ -18,6 +19,17 @@ interface StockRepositoryInterface
     public function findByWarehouseRegionAndProduct(WarehouseRegion $warehouseRegion, Product $product): ?Stock;
 
     public function exists(WarehouseRegion $warehouseRegion, Product $product): bool;
+
+    /**
+     * @param  array<int, int>  $productIds
+     * @return Collection<int, Stock>
+     */
+    public function getByProductIds(array $productIds): Collection;
+
+    /**
+     * @return Collection<int, Stock>
+     */
+    public function getByWarehouseRegion(WarehouseRegion $warehouseRegion): Collection;
 
     public function updateValues(WarehouseRegion $warehouseRegion, Product $product, array $values): void;
 

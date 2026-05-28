@@ -2,6 +2,7 @@
 
 namespace Molitor\Stock\Repositories;
 
+use Illuminate\Support\Collection;
 use Molitor\Product\Models\Product;
 use Molitor\Stock\Models\Stock;
 use Molitor\Stock\Models\Warehouse;
@@ -49,6 +50,29 @@ class StockRepository implements StockRepositoryInterface
         return (int) $this->stock->where('warehouse_region_id', $warehouseRegion->id)
             ->where('product_id', $product->id)
             ->exists();
+    }
+
+    /**
+     * @param  array<int, int>  $productIds
+     * @return Collection<int, Stock>
+     */
+    public function getByProductIds(array $productIds): Collection
+    {
+        return $this->stock->newQuery()
+            ->select(['product_id', 'warehouse_region_id', 'quantity', 'min_quantity', 'max_quantity'])
+            ->whereIn('product_id', $productIds)
+            ->get();
+    }
+
+    /**
+     * @return Collection<int, Stock>
+     */
+    public function getByWarehouseRegion(WarehouseRegion $warehouseRegion): Collection
+    {
+        return $this->stock->newQuery()
+            ->where('warehouse_region_id', $warehouseRegion->id)
+            ->orderBy('product_id')
+            ->get(['product_id', 'quantity']);
     }
 
     public function isEmpty(WarehouseRegion $warehouseRegion, Product $product): bool

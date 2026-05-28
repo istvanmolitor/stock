@@ -14,7 +14,6 @@ use Molitor\Product\Models\Product;
 use Molitor\Product\Models\ProductImage;
 use Molitor\Stock\Http\Requests\UpdateStockProductRegionQuantityLimitsRequest;
 use Molitor\Stock\Http\Resources\StockProductRegionQuantityLimitsResource;
-use Molitor\Stock\Models\Stock;
 use Molitor\Stock\Models\Warehouse;
 use Molitor\Stock\Models\WarehouseRegion;
 use Molitor\Stock\Repositories\StockRepositoryInterface;
@@ -203,10 +202,7 @@ class StockProductApiController extends Controller
             return $quantitiesByProduct;
         }
 
-        $stockRows = Stock::query()
-            ->select(['product_id', 'warehouse_region_id', 'quantity', 'min_quantity', 'max_quantity'])
-            ->whereIn('product_id', $productIds)
-            ->get();
+        $stockRows = $this->stockRepository->getByProductIds($productIds);
 
         foreach ($stockRows as $stockRow) {
             $productId = (int) $stockRow->product_id;

@@ -18,7 +18,7 @@ class UpdateInventoryRequest extends FormRequest
     {
         return [
             'description' => ['nullable', 'string'],
-            'items' => ['required', 'array', 'min:1'],
+            'items' => ['present', 'array'],
             'items.*.id' => ['nullable', 'integer', Rule::exists('inventory_items', 'id')],
             'items.*.product_id' => ['required', 'integer', Rule::exists('products', 'id')],
             'items.*.new_quantity' => ['required', 'integer', 'min:0'],
@@ -29,9 +29,8 @@ class UpdateInventoryRequest extends FormRequest
     {
         return [
             'description.string' => 'A leírás csak szöveg lehet.',
-            'items.required' => 'Legalább egy tétel megadása kötelező.',
+            'items.present' => 'A tételek mező megadása kötelező.',
             'items.array' => 'A tételek formátuma nem megfelelő.',
-            'items.min' => 'Legalább egy tétel megadása kötelező.',
             'items.*.id.integer' => 'A tétel azonosítója csak szám lehet.',
             'items.*.id.exists' => 'A megadott tétel nem található.',
             'items.*.product_id.required' => 'A termék kiválasztása kötelező.',

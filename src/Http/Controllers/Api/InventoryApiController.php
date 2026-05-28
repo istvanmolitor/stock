@@ -16,7 +16,6 @@ use Molitor\Stock\Http\Resources\InventoryResource;
 use Molitor\Stock\Http\Resources\WarehouseRegionSimpleResource;
 use Molitor\Stock\Models\Inventory;
 use Molitor\Stock\Models\InventoryItem;
-use Molitor\Stock\Models\Stock;
 use Molitor\Stock\Models\WarehouseRegion;
 use Molitor\Stock\Repositories\StockRepositoryInterface;
 
@@ -70,19 +69,6 @@ class InventoryApiController extends Controller
                 'description' => $validated['description'] ?? null,
             ]);
 
-            $stockRows = Stock::query()
-                ->where('warehouse_region_id', (int) $validated['warehouse_region_id'])
-                ->orderBy('product_id')
-                ->get(['product_id', 'quantity']);
-
-            foreach ($stockRows as $stockRow) {
-                InventoryItem::query()->create([
-                    'inventory_id' => $inventory->id,
-                    'product_id' => (int) $stockRow->product_id,
-                    'old_quantity' => (float) $stockRow->quantity,
-                    'new_quantity' => (float) $stockRow->quantity,
-                ]);
-            }
 
             return $inventory;
         });
@@ -141,13 +127,23 @@ class InventoryApiController extends Controller
                 ->get()
                 ->keyBy('id');
 
+            $submittedExistingItemIds = [];
+
             foreach ($validated['items'] as $item) {
                 $itemId = isset($item['id']) ? (int) $item['id'] : null;
 
-                if ($itemId !== null && $existingItemsById->has($itemId)) {
+                if ($itemId !== null) {
+                    if (! $existingItemsById->has($itemId)) {
+                        throw ValidationException::withMessages([
+                            'items' => ['A megadott tétel nem ehhez a leltárhoz tartozik.'],
+                        ]);
+                    }
+
                     $existingItemsById->get($itemId)?->update([
                         'new_quantity' => (int) $item['new_quantity'],
                     ]);
+
+                    $submittedExistingItemIds[] = $itemId;
 
                     continue;
                 }
@@ -158,6 +154,16 @@ class InventoryApiController extends Controller
                     'old_quantity' => 0,
                     'new_quantity' => (int) $item['new_quantity'],
                 ]);
+            }
+
+            $itemIdsToDelete = $existingItemsById
+                ->keys()
+                ->diff($submittedExistingItemIds);
+
+            if ($itemIdsToDelete->isNotEmpty()) {
+                $inventory->inventoryItems()
+                    ->whereIn('id', $itemIdsToDelete->all())
+                    ->delete();
             }
         });
 
