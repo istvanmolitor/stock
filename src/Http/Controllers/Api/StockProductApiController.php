@@ -12,12 +12,19 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Schema;
 use Molitor\Product\Models\Product;
 use Molitor\Product\Models\ProductImage;
+use Molitor\Stock\Http\Requests\UpdateStockProductRegionQuantityLimitsRequest;
+use Molitor\Stock\Http\Resources\StockProductRegionQuantityLimitsResource;
 use Molitor\Stock\Models\Stock;
 use Molitor\Stock\Models\Warehouse;
 use Molitor\Stock\Models\WarehouseRegion;
+use Molitor\Stock\Repositories\StockRepositoryInterface;
 
 class StockProductApiController extends Controller
 {
+    public function __construct(
+        protected StockRepositoryInterface $stockRepository,
+    ) {}
+
     public function index(Request $request): JsonResponse
     {
         $search = trim((string) $request->input('search', ''));
@@ -102,6 +109,42 @@ class StockProductApiController extends Controller
         ]);
     }
 
+    public function updateRegionQuantityLimits(
+        UpdateStockProductRegionQuantityLimitsRequest $request,
+        Product $product,
+        WarehouseRegion $warehouseRegion
+    ): JsonResponse
+    {
+        $validated = $request->validated();
+        $values = [
+            'min_quantity' => $validated['min_quantity'] ?? null,
+            'max_quantity' => $validated['max_quantity'] ?? null,
+        ];
+
+        $existingStock = $this->stockRepository->findByWarehouseRegionAndProduct($warehouseRegion, $product);
+
+        if ($existingStock === null) {
+            $this->stockRepository->updateValues($warehouseRegion, $product, [
+                'quantity' => 0,
+                ...$values,
+            ]);
+        } else {
+            $this->stockRepository->updateValues($warehouseRegion, $product, $values);
+        }
+
+        $stock = $this->stockRepository->findByWarehouseRegionAndProduct($warehouseRegion, $product);
+        if ($stock === null) {
+            abort(404, 'A készlet rekord nem található.');
+        }
+
+        $stock->loadMissing('warehouseRegion.warehouse');
+
+        return response()->json([
+            'data' => new StockProductRegionQuantityLimitsResource($stock),
+            'message' => 'A regio minimum es maximum keszlet beallitasa sikeresen frissult.',
+        ]);
+    }
+
     protected function getWarehouses(): Collection
     {
         return Warehouse::query()
@@ -114,7 +157,7 @@ class StockProductApiController extends Controller
 
     /**
      * @param  array<int, int>  $productIds
-     * @return array<int, array<int, float>>
+     * @return array<int, array<int, array{quantity: float, min_quantity: ?float, max_quantity: ?float}>>
      */
     protected function getQuantitiesByProductIds(array $productIds): array
     {
@@ -125,22 +168,25 @@ class StockProductApiController extends Controller
         }
 
         $stockRows = Stock::query()
-            ->selectRaw('product_id, warehouse_region_id, SUM(quantity) as quantity')
+            ->select(['product_id', 'warehouse_region_id', 'quantity', 'min_quantity', 'max_quantity'])
             ->whereIn('product_id', $productIds)
-            ->groupBy('product_id', 'warehouse_region_id')
             ->get();
 
         foreach ($stockRows as $stockRow) {
             $productId = (int) $stockRow->product_id;
             $warehouseRegionId = (int) $stockRow->warehouse_region_id;
-            $quantitiesByProduct[$productId][$warehouseRegionId] = (float) $stockRow->quantity;
+            $quantitiesByProduct[$productId][$warehouseRegionId] = [
+                'quantity' => (float) $stockRow->quantity,
+                'min_quantity' => $stockRow->min_quantity !== null ? (float) $stockRow->min_quantity : null,
+                'max_quantity' => $stockRow->max_quantity !== null ? (float) $stockRow->max_quantity : null,
+            ];
         }
 
         return $quantitiesByProduct;
     }
 
     /**
-     * @param  array<int, array<int, float>>  $quantitiesByProduct
+     * @param  array<int, array<int, array{quantity: float, min_quantity: ?float, max_quantity: ?float}>>  $quantitiesByProduct
      * @return array<string, mixed>
      */
     protected function transformProductSummary(
@@ -166,7 +212,7 @@ class StockProductApiController extends Controller
     }
 
     /**
-     * @param  array<int, array<int, float>>  $quantitiesByProduct
+     * @param  array<int, array<int, array{quantity: float, min_quantity: ?float, max_quantity: ?float}>>  $quantitiesByProduct
      * @return array<string, mixed>
      */
     protected function buildProductDetail(
@@ -241,7 +287,7 @@ class StockProductApiController extends Controller
     }
 
     /**
-     * @param  array<int, array<int, float>>  $quantitiesByProduct
+     * @param  array<int, array<int, array{quantity: float, min_quantity: ?float, max_quantity: ?float}>>  $quantitiesByProduct
      * @return array<int, array<string, mixed>>
      */
     protected function buildWarehouseData(Product $product, Collection $warehouses, array $quantitiesByProduct): array
@@ -250,14 +296,20 @@ class StockProductApiController extends Controller
             ->map(function (Warehouse $warehouse) use ($product, $quantitiesByProduct): array {
                 $regions = $warehouse->regions
                     ->map(function (WarehouseRegion $warehouseRegion) use ($product, $quantitiesByProduct, $warehouse): array {
-                        $quantity = $quantitiesByProduct[$product->id][$warehouseRegion->id] ?? 0.0;
+                        $stockData = $quantitiesByProduct[$product->id][$warehouseRegion->id] ?? [
+                            'quantity' => 0.0,
+                            'min_quantity' => null,
+                            'max_quantity' => null,
+                        ];
 
                         return [
                             'warehouse_region_id' => $warehouseRegion->id,
                             'warehouse_region_name' => $warehouseRegion->name,
                             'warehouse_name' => $warehouse->name,
                             'label' => trim((string) $warehouseRegion),
-                            'quantity' => $quantity,
+                            'quantity' => $stockData['quantity'],
+                            'min_quantity' => $stockData['min_quantity'],
+                            'max_quantity' => $stockData['max_quantity'],
                         ];
                     })
                     ->values();

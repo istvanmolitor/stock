@@ -3,6 +3,7 @@
 namespace Molitor\Stock\Repositories;
 
 use Molitor\Product\Models\Product;
+use Molitor\Stock\Models\Stock;
 use Molitor\Stock\Models\Warehouse;
 use Molitor\Stock\Models\WarehouseRegion;
 
@@ -14,9 +15,17 @@ interface StockRepositoryInterface
 
     public function getQuantity(WarehouseRegion $warehouseRegion, Product $product): int;
 
+    public function findByWarehouseRegionAndProduct(WarehouseRegion $warehouseRegion, Product $product): ?Stock;
+
     public function exists(WarehouseRegion $warehouseRegion, Product $product): bool;
 
+    public function updateValues(WarehouseRegion $warehouseRegion, Product $product, array $values): void;
+
     public function setQuantity(WarehouseRegion $warehouseRegion, Product $product, int $quantity): void;
+
+    public function setMinQuantity(WarehouseRegion $warehouseRegion, Product $product, int|null $minQuantity): void;
+
+    public function setMaxQuantity(WarehouseRegion $warehouseRegion, Product $product, int|null $maxQuantity): void;
 
     public function delete(WarehouseRegion $warehouseRegion, Product $product): void;
 }

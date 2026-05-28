@@ -21,6 +21,8 @@ class CreateStocksTable extends Migration
             $table->foreign('product_id')->references('id')->on('products');
 
             $table->decimal('quantity');
+            $table->decimal('min_quantity')->nullable();
+            $table->decimal('max_quantity')->nullable();
 
             $table->primary(['warehouse_region_id', 'product_id']);
         });

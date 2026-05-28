@@ -16,7 +16,18 @@ class Stock extends Model
         'warehouse_region_id',
         'product_id',
         'quantity',
+        'min_quantity',
+        'max_quantity',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'quantity' => 'decimal:2',
+            'min_quantity' => 'decimal:2',
+            'max_quantity' => 'decimal:2',
+        ];
+    }
 
     public function warehouseRegion(): BelongsTo
     {

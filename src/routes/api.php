@@ -15,6 +15,8 @@ Route::prefix('admin/stock')
     ->group(function (): void {
         Route::get('products', [StockProductApiController::class, 'index'])->name('products.index');
         Route::get('products/{product}', [StockProductApiController::class, 'show'])->name('products.show');
+        Route::put('products/{product}/regions/{warehouseRegion}', [StockProductApiController::class, 'updateRegionQuantityLimits'])
+            ->name('products.regions.update-limits');
         Route::resource('warehouses', WarehouseApiController::class);
         Route::resource('warehouse-regions', WarehouseRegionApiController::class);
         Route::get('inventories', [InventoryApiController::class, 'index'])->name('inventories.index');
