@@ -6,6 +6,8 @@ use Illuminate\Routing\Router;
 use Illuminate\Support\ServiceProvider;
 use Molitor\Product\Models\Product;
 use Molitor\Stock\Models\WarehouseRegion;
+use Molitor\Stock\Repositories\InventoryRepository;
+use Molitor\Stock\Repositories\InventoryRepositoryInterface;
 use Molitor\Stock\Repositories\StockMovementItemRepository;
 use Molitor\Stock\Repositories\StockMovementItemRepositoryInterface;
 use Molitor\Stock\Repositories\StockMovementRepository;
@@ -43,6 +45,7 @@ class StockServiceProvider extends ServiceProvider
 
     public function register(): void
     {
+        $this->app->bind(InventoryRepositoryInterface::class, InventoryRepository::class);
         $this->app->bind(WarehouseRepositoryInterface::class, WarehouseRepository::class);
         $this->app->bind(WarehouseRegionRepositoryInterface::class, WarehouseRegionRepository::class);
         $this->app->bind(StockMovementRepositoryInterface::class, StockMovementRepository::class);

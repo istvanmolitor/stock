@@ -27,9 +27,15 @@ class WarehouseRegionRepository implements WarehouseRegionRepositoryInterface
     {
         return $this->warehouseRegion
             ->join('regions', 'regions.id', '=', 'warehouse_regions.region_id')
-            ->orderBy(['warehouse.name', 'warehouse_regions.name'])
+            ->orderBy('warehouse.name')
+            ->orderBy('warehouse_regions.name')
             ->with('region')
             ->get('warehouse_regions.*');
+    }
+
+    public function findOrFail(int $id): WarehouseRegion
+    {
+        return $this->warehouseRegion->newQuery()->findOrFail($id);
     }
 
     public function getDefaultWarehouseRegionName(): string

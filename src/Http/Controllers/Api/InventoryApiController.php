@@ -17,14 +17,18 @@ use Molitor\Stock\Http\Resources\WarehouseRegionSimpleResource;
 use Molitor\Stock\Models\Inventory;
 use Molitor\Stock\Models\InventoryItem;
 use Molitor\Stock\Models\WarehouseRegion;
+use Molitor\Stock\Repositories\InventoryRepositoryInterface;
 use Molitor\Stock\Repositories\StockRepositoryInterface;
+use Molitor\Stock\Repositories\WarehouseRegionRepositoryInterface;
 
 class InventoryApiController extends Controller
 {
     use HasAdminFilters;
 
     public function __construct(
+        protected InventoryRepositoryInterface $inventoryRepository,
         protected StockRepositoryInterface $stockRepository,
+        protected WarehouseRegionRepositoryInterface $warehouseRegionRepository,
     ) {}
 
     public function index(Request $request): JsonResponse
@@ -65,27 +69,13 @@ class InventoryApiController extends Controller
 
         $inventory = DB::transaction(function () use ($validated): Inventory {
             $warehouseRegionId = (int) $validated['warehouse_region_id'];
+            $warehouseRegion = $this->warehouseRegionRepository->findOrFail($warehouseRegionId);
 
-            $inventory = Inventory::query()->create([
-                'warehouse_region_id' => $warehouseRegionId,
-                'description' => $validated['description'] ?? null,
-            ]);
+            $inventory = $this->inventoryRepository->create(
+                $warehouseRegion,
+                $validated['description'] ?? null,
+            );
 
-            $warehouseRegion = WarehouseRegion::query()->findOrFail($warehouseRegionId);
-            $regionStocks = $this->stockRepository->getByWarehouseRegion($warehouseRegion);
-
-            foreach ($regionStocks as $stock) {
-                if ((float) $stock->quantity <= 0) {
-                    continue;
-                }
-
-                InventoryItem::query()->create([
-                    'inventory_id' => $inventory->id,
-                    'product_id' => $stock->product_id,
-                    'old_quantity' => null,
-                    'new_quantity' => (float) $stock->quantity,
-                ]);
-            }
 
             return $inventory;
         });

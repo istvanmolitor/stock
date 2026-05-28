@@ -13,6 +13,8 @@ interface WarehouseRegionRepositoryInterface
 {
     public function getAll(): Collection;
 
+    public function findOrFail(int $id): WarehouseRegion;
+
     public function delete(WarehouseRegion $warehouseRegion);
 
     public function getByName(Warehouse $warehouse, string $name): ?WarehouseRegion;
