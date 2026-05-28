@@ -17,6 +17,8 @@ Route::prefix('admin/stock')
         Route::get('products/{product}', [StockProductApiController::class, 'show'])->name('products.show');
         Route::put('products/{product}/regions/{warehouseRegion}', [StockProductApiController::class, 'updateRegionQuantityLimits'])
             ->name('products.regions.update-limits');
+        Route::delete('products/{product}/regions/{warehouseRegion}/limits', [StockProductApiController::class, 'clearRegionQuantityLimits'])
+            ->name('products.regions.clear-limits');
         Route::resource('warehouses', WarehouseApiController::class);
         Route::resource('warehouse-regions', WarehouseRegionApiController::class);
         Route::get('inventories', [InventoryApiController::class, 'index'])->name('inventories.index');

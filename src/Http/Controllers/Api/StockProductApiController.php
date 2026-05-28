@@ -145,6 +145,42 @@ class StockProductApiController extends Controller
         ]);
     }
 
+    public function clearRegionQuantityLimits(Product $product, WarehouseRegion $warehouseRegion): JsonResponse
+    {
+        $existingStock = $this->stockRepository->findByWarehouseRegionAndProduct($warehouseRegion, $product);
+
+        if ($existingStock !== null) {
+            $this->stockRepository->updateValues($warehouseRegion, $product, [
+                'min_quantity' => null,
+                'max_quantity' => null,
+            ]);
+
+            $stock = $this->stockRepository->findByWarehouseRegionAndProduct($warehouseRegion, $product);
+            if ($stock !== null) {
+                $stock->loadMissing('warehouseRegion.warehouse');
+
+                return response()->json([
+                    'data' => new StockProductRegionQuantityLimitsResource($stock),
+                    'message' => 'A regio minimum es maximum keszlet ertekei torolve lettek.',
+                ]);
+            }
+        }
+
+        $warehouseRegion->loadMissing('warehouse');
+
+        return response()->json([
+            'data' => [
+                'warehouse_region_id' => $warehouseRegion->id,
+                'warehouse_region_name' => $warehouseRegion->name,
+                'warehouse_name' => $warehouseRegion->warehouse?->name,
+                'quantity' => 0.0,
+                'min_quantity' => null,
+                'max_quantity' => null,
+            ],
+            'message' => 'A regio minimum es maximum keszlet ertekei torolve lettek.',
+        ]);
+    }
+
     protected function getWarehouses(): Collection
     {
         return Warehouse::query()
@@ -310,6 +346,7 @@ class StockProductApiController extends Controller
                             'quantity' => $stockData['quantity'],
                             'min_quantity' => $stockData['min_quantity'],
                             'max_quantity' => $stockData['max_quantity'],
+                            'has_limits' => $stockData['min_quantity'] !== null || $stockData['max_quantity'] !== null,
                         ];
                     })
                     ->values();
