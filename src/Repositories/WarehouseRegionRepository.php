@@ -86,4 +86,20 @@ class WarehouseRegionRepository implements WarehouseRegionRepositoryInterface
         $warehouseRegion->is_primary = true;
         $warehouseRegion->save();
     }
+
+    public function create(int $warehouseId, string $name, ?string $description, bool $isPrimary): WarehouseRegion
+    {
+        $warehouseRegion = $this->warehouseRegion->create([
+            'warehouse_id' => $warehouseId,
+            'name' => $name,
+            'description' => $description,
+            'is_primary' => $isPrimary,
+        ]);
+
+        if ($isPrimary) {
+            $this->setPrimary($warehouseRegion);
+        }
+
+        return $warehouseRegion;
+    }
 }

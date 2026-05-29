@@ -14,10 +14,15 @@ use Molitor\Stock\Http\Resources\WarehouseRegionResource;
 use Molitor\Stock\Http\Resources\WarehouseSimpleResource;
 use Molitor\Stock\Models\Warehouse;
 use Molitor\Stock\Models\WarehouseRegion;
+use Molitor\Stock\Repositories\WarehouseRegionRepositoryInterface;
 
 class WarehouseRegionApiController extends Controller
 {
     use HasAdminFilters;
+
+    public function __construct(
+        private WarehouseRegionRepositoryInterface $warehouseRegionRepository
+    ) {}
 
     public function index(Request $request): JsonResponse
     {
@@ -49,16 +54,12 @@ class WarehouseRegionApiController extends Controller
     {
         $validated = $request->validated();
 
-        $warehouseRegion = WarehouseRegion::query()->create([
-            'warehouse_id' => $validated['warehouse_id'],
-            'name' => $validated['name'],
-            'description' => $validated['description'] ?? null,
-            'is_primary' => $validated['is_primary'] ?? false,
-        ]);
-
-        if (($validated['is_primary'] ?? false) === true) {
-            $this->setPrimaryRegion($warehouseRegion);
-        }
+        $warehouseRegion = $this->warehouseRegionRepository->create(
+            (int) $validated['warehouse_id'],
+            $validated['name'],
+            $validated['description'] ?? null,
+            $validated['is_primary'] ?? false,
+        );
 
         $warehouseRegion->load('warehouse');
 

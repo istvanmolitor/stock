@@ -20,4 +20,6 @@ interface WarehouseRepositoryInterface
     public function getByName(string $name): ?Warehouse;
 
     public function getDefault(): Warehouse;
+
+    public function create(string $name, ?string $description, bool $isPrimary): Warehouse;
 }

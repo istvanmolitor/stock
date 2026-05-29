@@ -59,6 +59,21 @@ class WarehouseRepository implements WarehouseRepositoryInterface
         ]);
     }
 
+    public function create(string $name, ?string $description, bool $isPrimary): Warehouse
+    {
+        $warehouse = $this->warehouse->create([
+            'name' => $name,
+            'description' => $description,
+            'is_primary' => $isPrimary,
+        ]);
+
+        if ($isPrimary) {
+            $this->setPrimary($warehouse);
+        }
+
+        return $warehouse;
+    }
+}
     public function setPrimary(Warehouse $warehouse): void
     {
         $this->warehouse->where('id', '<>', $warehouse->id)->update(['is_primary' => false]);
