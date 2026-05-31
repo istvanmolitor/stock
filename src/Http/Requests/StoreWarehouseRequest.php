@@ -5,12 +5,13 @@ declare(strict_types=1);
 namespace Molitor\Stock\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Gate;
 
 class StoreWarehouseRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return Gate::allows('acl', 'stock');
     }
 
     public function rules(): array

@@ -10,7 +10,7 @@ use Molitor\Stock\Http\Controllers\Api\WarehouseApiController;
 use Molitor\Stock\Http\Controllers\Api\WarehouseRegionApiController;
 
 Route::prefix('admin/stock')
-    ->middleware(['api', 'auth:sanctum'])
+    ->middleware(['api', 'auth:sanctum', 'permission:stock'])
     ->name('stock.')
     ->group(function (): void {
         Route::get('products', [StockProductApiController::class, 'index'])->name('products.index');
@@ -28,6 +28,6 @@ Route::prefix('admin/stock')
         Route::put('inventories/{inventory}', [InventoryApiController::class, 'update'])->name('inventories.update');
         Route::delete('inventories/{inventory}', [InventoryApiController::class, 'destroy'])->name('inventories.destroy');
         Route::post('inventories/{inventory}/close', [InventoryApiController::class, 'close'])->name('inventories.close');
-        Route::post('movements/{stockMovement}/execute', [StockMovementApiController::class, 'execute'])->name('stock.movements.execute');
-        Route::resource('movements', StockMovementApiController::class)->parameters(['movements' => 'stockMovement']);
+        Route::post('movements/{stockMovement}/execute', [StockMovementApiController::class, 'execute'])->middleware('permission:stock_movement')->name('stock.movements.execute');
+        Route::resource('movements', StockMovementApiController::class)->middleware('permission:stock_movement')->parameters(['movements' => 'stockMovement']);
     });
