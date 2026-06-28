@@ -21,6 +21,11 @@ class InventoryDataTable extends DataTable
         return InventoryResource::class;
     }
 
+    protected function getSearchPlaceholder(): string
+    {
+        return 'Keresés leírás alapján...';
+    }
+
     protected function initColumns(): void
     {
         $this->addColumn('created_at')->setOrderable();

@@ -21,6 +21,11 @@ class WarehouseDataTable extends DataTable
         return WarehouseResource::class;
     }
 
+    protected function getSearchPlaceholder(): string
+    {
+        return 'Keresés név vagy leírás alapján...';
+    }
+
     protected function initColumns(): void
     {
         $this->addColumn('name')->setSearchable()->setOrderable();
