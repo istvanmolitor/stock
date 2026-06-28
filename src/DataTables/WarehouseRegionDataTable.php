@@ -29,7 +29,9 @@ class WarehouseRegionDataTable extends DataTable
     protected function initColumns(): void
     {
         $this->addColumn('name')->setSearchable()->setOrderable();
+        $this->addColumn('warehouse')->setLabel('Raktár');
         $this->addColumn('description')->setSearchable();
+        $this->addColumn('is_primary')->setLabel('Elsődleges')->setOrderable();
     }
 
     public function query(Builder $query): Builder

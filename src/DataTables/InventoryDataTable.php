@@ -28,8 +28,12 @@ class InventoryDataTable extends DataTable
 
     protected function initColumns(): void
     {
+        $this->addColumn('warehouse_region')->setLabel('Raktárrégió');
+        $this->addColumn('user')->setLabel('Felelős');
         $this->addColumn('created_at')->setOrderable();
         $this->addColumn('description')->setSearchable();
+        $this->addColumn('is_closed')->setLabel('Állapot');
+        $this->addColumn('stock_updated_at')->setLabel('Lezárva')->setOrderable();
     }
 
     protected function getDefaultSort(): string

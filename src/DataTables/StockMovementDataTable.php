@@ -28,8 +28,11 @@ class StockMovementDataTable extends DataTable
 
     protected function initColumns(): void
     {
+        $this->addColumn('type_label')->setLabel('Típus');
+        $this->addColumn('warehouse')->setLabel('Raktár');
         $this->addColumn('created_at')->setOrderable();
         $this->addColumn('description')->setSearchable();
+        $this->addColumn('is_closed')->setLabel('Állapot');
     }
 
     protected function getDefaultSort(): string

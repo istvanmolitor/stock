@@ -30,6 +30,7 @@ class WarehouseDataTable extends DataTable
     {
         $this->addColumn('name')->setSearchable()->setOrderable();
         $this->addColumn('description')->setSearchable();
+        $this->addColumn('is_primary')->setLabel('Elsődleges')->setOrderable();
     }
 
     public function query(Builder $query): Builder
