@@ -84,6 +84,11 @@ class StockProductApiController extends Controller
                 'sort' => $sort,
                 'direction' => $direction,
             ],
+            'columns' => [
+                ['key' => 'main_image_url', 'label' => 'Kép', 'sortable' => false],
+                ['key' => 'sku', 'label' => 'SKU', 'sortable' => true],
+                ['key' => 'total_quantity', 'label' => 'Összesített készlet', 'sortable' => false],
+            ],
         ]);
     }
 
