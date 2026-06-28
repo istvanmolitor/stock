@@ -37,9 +37,9 @@ class StockMovementDataTable extends DataTable
         return 'desc';
     }
 
-    protected function getBaseQuery(): Builder
+    public function query(Builder $query): Builder
     {
-        return StockMovement::query()
+        return $query
             ->with(['warehouse:id,name', 'user:id,name'])
             ->withCount('stockMovementItems as items_count');
     }

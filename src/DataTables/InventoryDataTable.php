@@ -37,9 +37,9 @@ class InventoryDataTable extends DataTable
         return 'desc';
     }
 
-    protected function getBaseQuery(): Builder
+    public function query(Builder $query): Builder
     {
-        return Inventory::query()
+        return $query
             ->with(['warehouseRegion.warehouse:id,name', 'user:id,name'])
             ->withCount('inventoryItems');
     }

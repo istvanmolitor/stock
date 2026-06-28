@@ -27,8 +27,8 @@ class WarehouseRegionDataTable extends DataTable
         $this->addColumn('description')->setSearchable();
     }
 
-    protected function getBaseQuery(): Builder
+    public function query(Builder $query): Builder
     {
-        return WarehouseRegion::query()->with('warehouse');
+        return $query->with('warehouse');
     }
 }
