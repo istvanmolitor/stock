@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Molitor\Stock\Http\Controllers\Api;
 
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Routing\Controller;
-use Molitor\Admin\Traits\HasAdminFilters;
+use Molitor\Stock\DataTables\WarehouseRegionDataTable;
 use Molitor\Stock\Http\Requests\StoreWarehouseRegionRequest;
 use Molitor\Stock\Http\Requests\UpdateWarehouseRegionRequest;
 use Molitor\Stock\Http\Resources\WarehouseRegionResource;
@@ -18,29 +18,13 @@ use Molitor\Stock\Repositories\WarehouseRegionRepositoryInterface;
 
 class WarehouseRegionApiController extends Controller
 {
-    use HasAdminFilters;
-
     public function __construct(
         private WarehouseRegionRepositoryInterface $warehouseRegionRepository
     ) {}
 
-    public function index(Request $request): JsonResponse
+    public function index(WarehouseRegionDataTable $dataTable): AnonymousResourceCollection
     {
-        $query = WarehouseRegion::query()->with('warehouse');
-        $warehouseRegions = $this->applyAdminFilters($query, $request, ['name', 'description'])
-            ->paginate(10)
-            ->withQueryString();
-
-        return response()->json([
-            'data' => WarehouseRegionResource::collection($warehouseRegions->items()),
-            'meta' => [
-                'current_page' => $warehouseRegions->currentPage(),
-                'last_page' => $warehouseRegions->lastPage(),
-                'per_page' => $warehouseRegions->perPage(),
-                'total' => $warehouseRegions->total(),
-            ],
-            'filters' => $request->only(['search', 'sort', 'direction']),
-        ]);
+        return $dataTable->getResponse();
     }
 
     public function create(): JsonResponse

@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Molitor\Stock\Http\Controllers\Api;
 
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
-use Molitor\Admin\Traits\HasAdminFilters;
+use Molitor\Stock\DataTables\StockMovementDataTable;
 use Molitor\Product\Models\Product;
 use Molitor\Stock\Enums\StockMovementType;
 use Molitor\Stock\Http\Requests\StoreStockMovementDraftRequest;
@@ -22,33 +22,13 @@ use Molitor\Stock\Repositories\StockRepositoryInterface;
 
 class StockMovementApiController extends Controller
 {
-    use HasAdminFilters;
-
     public function __construct(
         protected StockRepositoryInterface $stockRepository,
     ) {}
 
-    public function index(Request $request): JsonResponse
+    public function index(StockMovementDataTable $dataTable): AnonymousResourceCollection
     {
-        $query = StockMovement::query()
-            ->with(['warehouse:id,name', 'user:id,name'])
-            ->withCount('stockMovementItems as items_count');
-
-        $movements = $this->applyAdminFilters($query, $request, ['description'], '')
-            ->latest()
-            ->paginate(15)
-            ->withQueryString();
-
-        return response()->json([
-            'data' => StockMovementResource::collection($movements->items()),
-            'meta' => [
-                'current_page' => $movements->currentPage(),
-                'last_page' => $movements->lastPage(),
-                'per_page' => $movements->perPage(),
-                'total' => $movements->total(),
-            ],
-            'filters' => $request->only(['search', 'sort', 'direction']),
-        ]);
+        return $dataTable->getResponse();
     }
 
     public function create(): JsonResponse

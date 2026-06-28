@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Molitor\Stock\Http\Controllers\Api;
 
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
-use Molitor\Admin\Traits\HasAdminFilters;
+use Molitor\Stock\DataTables\InventoryDataTable;
 use Molitor\Stock\Http\Requests\StoreInventoryRequest;
 use Molitor\Stock\Http\Requests\UpdateInventoryRequest;
 use Molitor\Stock\Http\Resources\InventoryResource;
@@ -23,35 +23,15 @@ use Molitor\Stock\Repositories\WarehouseRegionRepositoryInterface;
 
 class InventoryApiController extends Controller
 {
-    use HasAdminFilters;
-
     public function __construct(
         protected InventoryRepositoryInterface $inventoryRepository,
         protected StockRepositoryInterface $stockRepository,
         protected WarehouseRegionRepositoryInterface $warehouseRegionRepository,
     ) {}
 
-    public function index(Request $request): JsonResponse
+    public function index(InventoryDataTable $dataTable): AnonymousResourceCollection
     {
-        $query = Inventory::query()
-            ->with(['warehouseRegion.warehouse:id,name', 'user:id,name'])
-            ->withCount('inventoryItems');
-
-        $inventories = $this->applyAdminFilters($query, $request, ['description'], '')
-            ->latest()
-            ->paginate(15)
-            ->withQueryString();
-
-        return response()->json([
-            'data' => InventoryResource::collection($inventories->items()),
-            'meta' => [
-                'current_page' => $inventories->currentPage(),
-                'last_page' => $inventories->lastPage(),
-                'per_page' => $inventories->perPage(),
-                'total' => $inventories->total(),
-            ],
-            'filters' => $request->only(['search', 'sort', 'direction']),
-        ]);
+        return $dataTable->getResponse();
     }
 
     public function create(): JsonResponse
