@@ -1,6 +1,6 @@
 {
     "name": "istvanmolitor/stock",
-    "description": "Stock",
+    "description": "Warehouse, stock movement, and inventory management built on the Molitor product package.",
     "type": "library",
     "license": "MIT",
     "authors": [
